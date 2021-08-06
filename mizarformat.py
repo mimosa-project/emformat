@@ -114,27 +114,29 @@ def generate_indent_level_list(input_lines):
     is_proof_in_theorem = False # Theoremブロック内にいる且つJustificationがProofであるか
     is_in_scheme = False    # Schemeブロック内にいるか
     semicolon_has_appeared_in_scheme = False  # schemeブロック内にいる且つ;が既出であるか
-    skip_next_proof = False # 次のproofをendとの組にしない
 
     for index, line in enumerate(input_lines):
-
-        if is_in_scheme == True:
-            if re.search(r'\b'+'provided'+r'\b', line):
-                indent_level -= 1
-                indent_level_list.append(indent_level)
-                indent_level += 1
-                continue
 
         if 'end;' in line:
             if indent_level >= 0:
                 indent_level -= 1
 
         if is_in_scheme == True:
+            # 字下げレベルが0になることでschemeブロックの終了を判定
             if indent_level == 0:
                 is_in_scheme = False
-            # 'proof'が';'より先に出てくる場合,字下げはしない
-            if (semicolon_has_appeared_in_scheme == False) and ('proof' in line):
-                skip_next_proof = True
+            # 'provided'が出現する場合
+            if re.search(r'\b'+'provided'+r'\b', line):
+                indent_level -= 1
+                indent_level_list.append(indent_level)
+                indent_level += 1
+                continue
+            # 'proof'が';'より先に出てくる場合
+            if (semicolon_has_appeared_in_scheme == False) and re.search(r'\b'+'proof'+r'\b', line):
+                indent_level -= 1
+                indent_level_list.append(indent_level)
+                indent_level += 1
+                continue
             elif ';' in line:
                 semicolon_has_appeared_in_scheme = True
 
@@ -175,14 +177,9 @@ def generate_indent_level_list(input_lines):
                     indent_level += 1
                     is_in_scheme = True
                     semicolon_has_appeared_in_scheme = False
-                    skip_next_proof = False
-                # scheme->proofの場合,字下げカウントを飛ばす
-                elif (is_in_scheme == True) and (item == 'proof') \
-                    and (skip_next_proof == True):
-                    skip_next_proof = False
                 else:
                     indent_level += 1
-
+                
     return indent_level_list
 
 
