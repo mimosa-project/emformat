@@ -117,6 +117,13 @@ def generate_indent_level_list(input_lines):
     skip_next_proof = False # 次のproofをendとの組にしない
 
     for index, line in enumerate(input_lines):
+
+        if re.search(r'\b'+'provided'+r'\b', line):
+            indent_level -= 1
+            indent_level_list.append(indent_level)
+            indent_level += 1
+            continue
+
         if 'end;' in line:
             if indent_level >= 0:
                 indent_level -= 1
