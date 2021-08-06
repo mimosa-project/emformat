@@ -482,9 +482,6 @@ def split_with_block_items(input_lines):
         input_lines(list): 1行が1要素として格納された文字列
     Returns:
         list: 単語の前後で行が分割された文字列
-    TODO:
-        ループで拾えないproofがあるので'''以下を追加.
-        できれば修正したい.
     """
     output_lines = []
     for line in input_lines:
@@ -496,7 +493,7 @@ def split_with_block_items(input_lines):
             if r:
                 # タグ名指定のあるtheoremブロックの場合
                 obj = re.search('theorem'+r'\s*([\d\w]+:)', line)
-                if obj:
+                if (item == 'theorem') and obj:
                     tag_str = obj.group(1)
                     line = re.sub(r'\s*theorem\s+[\d\w]+:\s*',
                         '\n'+'theorem '+tag_str+'\n', line)
@@ -506,11 +503,7 @@ def split_with_block_items(input_lines):
                     line = re.sub('provided', '\nprovided\n', line)
                 else:
                     line = re.sub('\s*'+item+'\s*', '\n'+item+'\n', line)
-        # '''
-        if 'proof' in line and not ('\nproof\n' in line):
-            line = re.sub('\s*proof\s*', '\nproof\n', line)
-        # '''
-
+        
         tmp_lines = line.split('\n')
         new_lines = [l for l in tmp_lines if l != '']
         output_lines.extend(new_lines)
