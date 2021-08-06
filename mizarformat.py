@@ -118,7 +118,8 @@ def generate_indent_level_list(input_lines):
 
     for index, line in enumerate(input_lines):
         if 'end;' in line:
-            indent_level -= 1
+            if indent_level >= 0:
+                indent_level -= 1
 
         if is_in_scheme == True:
             if indent_level == 0:
@@ -148,7 +149,8 @@ def generate_indent_level_list(input_lines):
              (is_proof_in_theorem == False):
             if re.search(';', line):
                 is_in_theorem = False
-                indent_level -= 1
+                if indent_level >= 0:
+                    indent_level -= 1
                 continue
 
         if 'theorem' in line:
@@ -158,7 +160,8 @@ def generate_indent_level_list(input_lines):
             continue
 
         for item in WITH_END_ITEMS:
-            if item in line:
+            r = re.search(r'\b'+item+r'\b', line)
+            if r:
                 # schemeの場合
                 if item == 'scheme':
                     indent_level += 1
@@ -169,10 +172,6 @@ def generate_indent_level_list(input_lines):
                 elif (is_in_scheme == True) and (item == 'proof') \
                     and (skip_next_proof == True):
                     skip_next_proof = False
-                # 'cases'を省く
-                elif item == 'case':
-                    if not ('cases' in line):
-                        indent_level += 1
                 else:
                     indent_level += 1
 
@@ -194,8 +193,9 @@ def indent_line(input_lines):
     # 各行に字下げ分のスペースを挿入
     for indent_level, line in zip(indent_level_list, input_lines):
         space_num = indent_level*INDENT_SIZE
-        if re.search(r'^\s*[\w\d]+:', line):
-            label_end_index = re.search(r'^\s*[\w\d]+:', line).end()
+        r = re.search(r'^\s*[\w\d]+:', line)
+        if r:
+            label_end_index = r.end()
             label_str = line[:label_end_index]
             after_label_str = line[label_end_index:]
             new_after_label_str = after_label_str.lstrip()
@@ -223,7 +223,8 @@ def insert_blankline(input_lines):
     prev_is_reserve = False 
     for line in input_lines:
         for item in START_BLOSK_TAG_LIST:
-            if item in line:
+            r = re.search(r'\b'+item+r'\b', line)
+            if r:
                 # item含む行の直前に挿入
                 # reserveが続く場合は挿入なし
                 if item == "reserve":
@@ -343,26 +344,21 @@ def process_lines(input_lines):
 
     environ_index = search_environ(input_lines)
     begin_index = search_begin(input_lines)
-    outline_comment_lines = [line for line in input_lines[: environ_index]]
-    environment_declaration_lines = \
-        [line for line in input_lines[environ_index: begin_index]]
-    text_proper_lines = [line for line in input_lines[begin_index:]]
+    outline_comment_lines = input_lines[: environ_index]
+    environment_declaration_lines = input_lines[environ_index: begin_index]
+    text_proper_lines = input_lines[begin_index:]
 
     #new_environment_declaration_lines = \
     #    process_environment_declaration(environment_declaration_lines)
     new_environment_declaration_lines = environment_declaration_lines
     new_text_proper_lines = process_text_proper(text_proper_lines)
     
-    if len(outline_comment_lines)==0:
-        output_lines.extend(new_environment_declaration_lines)
-        output_lines.append('')
-        output_lines.extend(new_text_proper_lines)
-    else:
+    if len(outline_comment_lines)>0:
         output_lines.extend(outline_comment_lines)
         output_lines.append('')
-        output_lines.extend(new_environment_declaration_lines)
-        output_lines.append('')
-        output_lines.extend(new_text_proper_lines)
+    output_lines.extend(new_environment_declaration_lines)
+    output_lines.append('')
+    output_lines.extend(new_text_proper_lines)
 
     return output_lines
    
@@ -412,7 +408,7 @@ def split_with_semicolon(input_lines):
         
     splited_lines = [l for l in splited_lines if l != '']
     
-    is_intext = False  # 文が途中であるかどうか
+    is_in_sentence = False  # 文が途中であるかどうか
     is_in_comment = False # ひとつ前の文がコメント文を含むかどうか
     for line in splited_lines:
         # コメント文を含む場合はそのまま追加
@@ -424,14 +420,14 @@ def split_with_semicolon(input_lines):
         elif re.search(r'^\s*[\w\d]*:', line):
             output_lines.append(line)
             if ';' in line:
-                is_intext = False
+                is_in_sentence = False
 
         # 文の途中でない場合は次の要素に追加
         # 文中に ';' が含まれる（文が終了する）かどうか確認
-        elif is_intext == False:
+        elif is_in_sentence == False:
             output_lines.append(line)
             if ';' not in line:
-                is_intext = True
+                is_in_sentence = True
         # 文の途中である場合は、ひとつ前の要素の文字列と連結する
         # 前の文がコメント文を含む場合は次の要素に追加
         # 文中に ';' が含まれる（文が終了する）かどうか確認
@@ -442,7 +438,7 @@ def split_with_semicolon(input_lines):
                 output_lines.append(line)
                 is_in_comment = False
             if ';' in line:
-                is_intext = False
+                is_in_sentence = False
     return output_lines
 
 
@@ -472,7 +468,7 @@ def split_with_equalsign(input_lines):
     return output_lines
 
 
-def split_with_items(input_lines):
+def split_with_block_items(input_lines):
     """
     'definition', 'proof'などの単語を単体で1行として,文を作り直す
     'theorem'ブロックはタグごと
@@ -491,11 +487,12 @@ def split_with_items(input_lines):
         if '::' in line:
             is_in_comment = True
         for item in SINGLE_TAG_ITEMS:
-            if re.search(item+r"[^s]", line):
+            r = re.search(r'\b'+item+r'\b', line)
+            if r:
                 # タグ名指定のあるtheoremブロックの場合
-                if re.search('theorem'+r'\s*[\d\w]+:', line):
-                    tag_obj = re.search('[\d\w]+:', line)
-                    tag_str = tag_obj.group()
+                obj = re.search('theorem'+r'\s*([\d\w]+:)', line)
+                if obj:
+                    tag_str = obj.group(1)
                     line = re.sub(r'\s*theorem\s+[\d\w]+:\s*',
                         '\n'+'theorem '+tag_str+'\n', line)
                 # schemeブロックの場合
@@ -511,9 +508,6 @@ def split_with_items(input_lines):
 
         tmp_lines = line.split('\n')
         new_lines = [l for l in tmp_lines if l != '']
-        # 文の後にコメント文を含む場合は、ひとつ前の行と連結
-        if is_in_comment==True and len(new_lines) > 1:
-            new_lines[len(new_lines)-2] += ' ' + new_lines.pop()
         output_lines.extend(new_lines)
 
     return output_lines
@@ -535,7 +529,7 @@ def preprocess_line(input_lines):
     splited_with_semicolon_lines = split_with_semicolon(new_input_lines)
     splited_with_equalsign_lines = split_with_equalsign(
         splited_with_semicolon_lines)
-    splited_with_items_lines = split_with_items(splited_with_equalsign_lines)
+    splited_with_items_lines = split_with_block_items(splited_with_equalsign_lines)
 
     stripped_lines = [l.strip() for l in splited_with_items_lines]
     output_lines.extend(stripped_lines)
