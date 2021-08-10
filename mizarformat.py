@@ -170,8 +170,8 @@ def generate_indent_level_list(input_lines):
             continue
 
         for item in WITH_END_ITEMS:
-            r = re.search(r'\b'+item+r'\b', line)
-            if r:
+            item_match = re.search(r'\b'+item+r'\b', line)
+            if item_match:
                 # schemeの場合
                 if item == 'scheme':
                     indent_level += 1
@@ -198,9 +198,9 @@ def indent_line(input_lines):
     # 各行に字下げ分のスペースを挿入
     for indent_level, line in zip(indent_level_list, input_lines):
         space_num = indent_level*INDENT_SIZE
-        r = re.search(r'^\s*[\w\d]+:', line)
-        if r:
-            label_end_index = r.end()
+        tag_match = re.search(r'^\s*[\w\d]+:', line)
+        if tag_match:
+            label_end_index = tag_match.end()
             label_str = line[:label_end_index]
             after_label_str = line[label_end_index:]
             new_after_label_str = after_label_str.lstrip()
@@ -228,8 +228,8 @@ def insert_blankline(input_lines):
     prev_is_reserve = False 
     for line in input_lines:
         for item in START_BLOSK_TAG_LIST:
-            r = re.search(r'\b'+item+r'\b', line)
-            if r:
+            item_match = re.search(r'\b'+item+r'\b', line)
+            if item_match:
                 # item含む行の直前に挿入
                 # reserveが続く場合は挿入なし
                 if item == "reserve":
@@ -489,12 +489,12 @@ def split_with_block_items(input_lines):
         if '::' in line:
             is_in_comment = True
         for item in SINGLE_TAG_ITEMS:
-            r = re.search(r'\b'+item+r'\b', line)
-            if r:
+            item_match = re.search(r'\b'+item+r'\b', line)
+            if item_match:
                 # タグ名指定のあるtheoremブロックの場合
-                obj = re.search('theorem'+r'\s*([\d\w]+:)', line)
-                if (item == 'theorem') and obj:
-                    tag_str = obj.group(1)
+                theorem_match = re.search('theorem'+r'\s*([\d\w]+:)', line)
+                if (item == 'theorem') and theorem_match:
+                    tag_str = theorem_match.group(1)
                     line = re.sub(r'\s*theorem\s+[\d\w]+:\s*',
                         '\n'+'theorem '+tag_str+'\n', line)
                 # schemeブロックの場合
