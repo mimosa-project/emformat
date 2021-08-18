@@ -503,7 +503,7 @@ def split_with_block_items(input_lines):
                     line = re.sub('provided', '\nprovided\n', line)
                 else:
                     line = re.sub('\s*'+item+'\s*', '\n'+item+'\n', line)
-        
+        line = re.sub(r'\s*(end)\s*;','\n'+'end;'+'\n', line)
         tmp_lines = line.split('\n')
         new_lines = [l for l in tmp_lines if l != '']
         output_lines.extend(new_lines)
