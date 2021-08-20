@@ -118,7 +118,7 @@ def generate_indent_level_list(input_lines):
     for index, line in enumerate(input_lines):
 
         if 'end;' in line:
-            if indent_level >= 0:
+            if indent_level > 0:
                 indent_level -= 1
 
         if is_in_scheme == True:
@@ -159,7 +159,7 @@ def generate_indent_level_list(input_lines):
              (is_proof_in_theorem == False):
             if re.search(';', line):
                 is_in_theorem = False
-                if indent_level >= 0:
+                if indent_level > 0:
                     indent_level -= 1
                 continue
 
