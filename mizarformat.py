@@ -1,6 +1,4 @@
 """
-FIXME:
-    beginの上１行改行追加
 TODO:
     文中の空白の入れ方を統一する処理を追加
     80文字オーバーの文を区切る場所判定＋分割位置リストを返す関数を作る
@@ -27,7 +25,7 @@ SINGLE_TAG_ITEMS = ["definition", "registration", "notation", "theorem",
 WITH_END_ITEMS = ["definition", "registration", "notation", 'scheme', "case",
 "suppose", "hereby", "now", "proof"]
 # ブロックの開始タグ群
-START_BLOSK_TAG_LIST = ["reserve", "definition", "registration", "notation", 
+START_BLOSK_TAG_LIST = ["reserve", "begin", "definition", "registration", "notation", 
 "theorem", "scheme"]
 
 
@@ -358,9 +356,7 @@ def process_lines(input_lines):
     new_environment_declaration_lines = environment_declaration_lines
     new_text_proper_lines = process_text_proper(text_proper_lines)
     
-    output_lines.extend(new_environment_declaration_lines)
-    output_lines.append('')
-    output_lines.extend(new_text_proper_lines)
+    output_lines = new_environment_declaration_lines + new_text_proper_lines
 
     return output_lines
    
