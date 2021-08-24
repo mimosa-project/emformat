@@ -43,13 +43,6 @@ def split_with_env_wrapping(input_line):
     pass
 
 
-def search_environ(input_lines):
-    """'environ'が登場する行の値を見つけて返す"""
-    for index, line in enumerate(input_lines):
-        if 'environ' in line:
-            return index
-
-
 def search_begin(input_lines):
     """初めて'begin'が登場する行の値を見つけて返す"""
     for index, line in enumerate(input_lines):
