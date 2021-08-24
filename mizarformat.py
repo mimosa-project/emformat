@@ -212,17 +212,19 @@ def indent_line(input_lines):
 def insert_blankline(input_lines):
     """
     Text-Itemのブロック間に空行を挿入する
+    コメント文の直後にあるタグの場合は,空行の挿入はコメント文結合処理に任せる
     Args:
         input_lines(list): 入力ファイル
     Returns:
         list: input_fileに出現するブロック間に空行が挿入された状態
     """
     output_lines = []
-    prev_is_reserve = False 
+    prev_is_reserve = False
+    prev_line = ''
     for line in input_lines:
         for item in START_BLOSK_TAG_LIST:
             item_match = re.search(r'\b'+item+r'\b', line)
-            if item_match:
+            if (item_match) and not ('::' in prev_line):
                 # item含む行の直前に挿入
                 # reserveが続く場合は挿入なし
                 if item == "reserve":
@@ -237,6 +239,7 @@ def insert_blankline(input_lines):
                 break
         else:
             output_lines.append(line)
+        prev_line = line
     return output_lines
 
 
@@ -586,8 +589,6 @@ def join_comment_part(input_lines, comment_status_list):
             blankline_num: [上行の空行数, 下行の空行数]
     Returns:
         output_lines(list): ソースコードとコメントを結合したファイル
-    FIXME:
-        "単体コメント行 -> ブロックの開始タグ"の場合,空行が1つ増えてしまう
     """
     output_lines = []
     prev_line = ''
