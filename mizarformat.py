@@ -107,6 +107,7 @@ def generate_indent_level_list(input_lines):
     is_proof_in_theorem = False # Theoremブロック内にいる且つJustificationがProofであるか
     is_in_scheme = False    # Schemeブロック内にいるか
     semicolon_has_appeared_in_scheme = False  # schemeブロック内にいる且つ;が既出であるか
+    items = '|'.join([item for item in WITH_END_ITEMS])
 
     for index, line in enumerate(input_lines):
 
@@ -162,17 +163,14 @@ def generate_indent_level_list(input_lines):
             is_proof_in_theorem = False
             continue
 
-        for item in WITH_END_ITEMS:
-            item_match = re.search(r'\b'+item+r'\b', line)
-            if item_match:
-                # schemeの場合
-                if item == 'scheme':
-                    indent_level += 1
-                    is_in_scheme = True
-                    semicolon_has_appeared_in_scheme = False
-                else:
-                    indent_level += 1
-                
+        if re.search(r'\b(' + items + r')\b', line):
+            if re.search(r'\bscheme\b', line):
+                indent_level += 1
+                is_in_scheme = True
+                semicolon_has_appeared_in_scheme = False
+            else:
+                indent_level += 1
+        
     return indent_level_list
 
 
