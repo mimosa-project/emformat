@@ -25,7 +25,7 @@ SINGLE_TAG_ITEMS = ["definition", "registration", "notation", "theorem",
 WITH_END_ITEMS = ["definition", "registration", "notation", 'scheme', "case",
 "suppose", "hereby", "now", "proof"]
 # ブロックの開始タグ群
-START_BLOSK_TAG_LIST = ["reserve", "begin", "definition", "registration", "notation", 
+START_BLOSK_TAG_LIST = ["begin", "definition", "registration", "notation",
 "theorem", "scheme"]
 
 
@@ -212,7 +212,6 @@ def indent_line(input_lines):
 def insert_blankline(input_lines):
     """
     Text-Itemのブロック間に空行を挿入する
-    コメント文の直後にあるタグの場合は,空行の挿入はコメント文結合処理に任せる
     Args:
         input_lines(list): 入力ファイル
     Returns:
@@ -220,26 +219,20 @@ def insert_blankline(input_lines):
     """
     output_lines = []
     prev_is_reserve = False
-    prev_line = ''
+    items = '|'.join([item for item in START_BLOSK_TAG_LIST])
     for line in input_lines:
-        for item in START_BLOSK_TAG_LIST:
-            item_match = re.search(r'\b'+item+r'\b', line)
-            if (item_match) and not ('::' in prev_line):
-                # item含む行の直前に挿入
-                # reserveが続く場合は挿入なし
-                if item == "reserve":
-                    if prev_is_reserve == True:
-                        output_lines.append(line)
-                    else:
-                        output_lines.extend(['', line])
-                    prev_is_reserve = True
-                else:
-                    prev_is_reserve = False
-                    output_lines.extend(['', line])
-                break
+        if (re.search(r'\breserve\b', line)):
+            if prev_is_reserve == True:
+                output_lines.append(line)
+            else:
+                output_lines.extend(['', line]) 
+            prev_is_reserve = True
+        elif re.search(r'\b(' + items + r')\b', line):
+            prev_is_reserve = False
+            output_lines.extend(['', line])
         else:
+            prev_is_reserve = False
             output_lines.append(line)
-        prev_line = line
     return output_lines
 
 
