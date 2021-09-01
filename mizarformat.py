@@ -561,7 +561,6 @@ def join_comment_part(input_lines, comment_status_list):
         output_lines(list): ソースコードとコメントを結合したファイル
     """
     output_lines = []
-    prev_line = ''
     for line in input_lines:
         if '::' in line:
             comment_status = comment_status_list.pop(0)
@@ -573,8 +572,6 @@ def join_comment_part(input_lines, comment_status_list):
                 output_lines.append(comment_part)
         else:
             output_lines.append(line)
-        prev_line = line
-
     return output_lines
 
 
