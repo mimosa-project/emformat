@@ -519,29 +519,18 @@ def extract_comment_part(input_lines):
     Args:
         input_lines(list): 入力ファイル
     Returns:
-        output_lines(list): コメント部分が抽出された入力ファイル
+        output_lines(list): コメント部分が除外された入力ファイル
         comment_status_list(list[3]): 抽出したコメントと周辺情報を格納
             comment_part(str): 抽出したコメント文
             is_only(boolian): コメント文単体の行ならTrue,混合ならFalse
-            blankline_num: [上行の空行数, 下行の空行数]
     """
-    prev_is_comment = False
     output_lines = []
     comment_status_list = []
-    blankline_cnt = 0
-    top_blankline_num = 0
-    bottom_blankline_num = 0
 
     new_input_lines = [line.strip() for line in input_lines]
     for line in new_input_lines:
-        # 空行の場合
-        if re.search(r'^\s*$', line):
-            blankline_cnt += 1
-            continue
-        
-        comment_obj = re.search(r'\s*::.*', line)
+        comment_obj = re.search(r'::', line)
         if comment_obj:
-            prev_is_comment = True
             comment_start_index = comment_obj.start()
             # コメント文単体の場合
             if comment_start_index == 0:
@@ -550,22 +539,13 @@ def extract_comment_part(input_lines):
                 is_only = True
             # ソースコードとコメント文が混在する場合
             else:
-                new_line = line[:comment_start_index]
+                new_line = line[:comment_start_index].strip()
                 output_lines.extend([new_line, '::'])
                 comment_part = line[comment_start_index:]
                 is_only = False
-            top_blankline_num = blankline_cnt
-            blankline_num = [top_blankline_num, 0]
-            comment_status_list.append([comment_part, is_only, blankline_num])
+            comment_status_list.append([comment_part, is_only])
         else:
-            # bottom_blankline_numを更新
-            if prev_is_comment == True:
-                bottom_blankline_num = blankline_cnt
-                comment_status_list[len(comment_status_list)-1][2][1] = \
-                    bottom_blankline_num
-            prev_is_comment = False
             output_lines.append(line)
-        blankline_cnt = 0
     return output_lines, comment_status_list
 
 
@@ -577,7 +557,6 @@ def join_comment_part(input_lines, comment_status_list):
         comment_status_list(list[3]): 抽出したコメントと周辺情報を格納
             comment_part(str): 抽出したコメント文
             is_only(boolian): コメント文単体の行ならTrue,混合ならFalse
-            blankline_num: [上行の空行数, 下行の空行数]
     Returns:
         output_lines(list): ソースコードとコメントを結合したファイル
     """
@@ -588,18 +567,10 @@ def join_comment_part(input_lines, comment_status_list):
             comment_status = comment_status_list.pop(0)
             comment_part = comment_status[0]
             is_only = comment_status[1]
-            top_blankline_num, bottom_blankline_num = comment_status[2]
-
             if is_only == False:
-                output_lines[len(output_lines)-1] = prev_line + comment_part
+                output_lines[-1] += (" " + comment_part)
             else:
-                new_lines = []
-                for tmp_cnt in range(top_blankline_num):
-                    new_lines.append('')
-                new_lines.append(comment_part)
-                for tmp_cnt in range(bottom_blankline_num):
-                    new_lines.append('')
-                output_lines.extend(new_lines)
+                output_lines.append(comment_part)
         else:
             output_lines.append(line)
         prev_line = line
@@ -619,9 +590,7 @@ def main():
 
     extracted_comment_part_lines, comment_status_list = \
         extract_comment_part(input_lines)
-    
     preprocessed_lines = preprocess_line(extracted_comment_part_lines)
-    #preprocessed_lines = [line+'\n' for line in preprocessed_lines]
     processed_lines = process_lines(preprocessed_lines)
     joined_comment_part_lines = \
         join_comment_part(processed_lines, comment_status_list)
