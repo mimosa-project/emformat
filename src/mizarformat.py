@@ -162,9 +162,10 @@ def generate_indent_level_list(input_lines):
             is_in_theorem = True
             is_proof_in_theorem = False
             continue
-
-        if re.search(r'\b(' + items + r')\b', line):
-            if re.search(r'\bscheme\b', line):
+        
+        match_obj =  re.search(r'\b(' + items + r')\b', line)
+        if match_obj:
+            if match_obj.group(1) == 'scheme':
                 indent_level += 1
                 is_in_scheme = True
                 semicolon_has_appeared_in_scheme = False
