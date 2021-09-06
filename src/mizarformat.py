@@ -25,7 +25,7 @@ SINGLE_TAG_ITEMS = ["definition", "registration", "notation", "theorem",
 WITH_END_ITEMS = ["definition", "registration", "notation", 'scheme', "case",
 "suppose", "hereby", "now", "proof"]
 # ブロックの開始タグ群
-START_BLOSK_TAG_LIST = ["reserve", "definition", "registration", "notation", 
+START_BLOSK_TAG_LIST = ["begin", "definition", "registration", "notation",
 "theorem", "scheme"]
 
 
@@ -43,13 +43,6 @@ def split_with_env_wrapping(input_line):
     pass
 
 
-def search_environ(input_lines):
-    """'environ'が登場する行の値を見つけて返す"""
-    for index, line in enumerate(input_lines):
-        if 'environ' in line:
-            return index
-
-
 def search_begin(input_lines):
     """初めて'begin'が登場する行の値を見つけて返す"""
     for index, line in enumerate(input_lines):
@@ -61,7 +54,7 @@ def process_environment_declaration(input_lines):
     """
     環境宣言部の処理をまとめた関数
     Args:
-        input_lines(list): 1行が1要素として格納された文字列
+        input_lines(list): 入力ファイル
     Returns:
         list: 整形された環境宣言部の文字列
     TODO:
@@ -104,7 +97,7 @@ def generate_indent_level_list(input_lines):
     """
     各行のインデントレベルを調べる
     Args:
-        input_lines(list): 1行が1要素として格納された文字列
+        input_lines(list): 入力ファイル
     Returns:
         list: 各行のインデントレベルを記録
     """
@@ -114,6 +107,7 @@ def generate_indent_level_list(input_lines):
     is_proof_in_theorem = False # Theoremブロック内にいる且つJustificationがProofであるか
     is_in_scheme = False    # Schemeブロック内にいるか
     semicolon_has_appeared_in_scheme = False  # schemeブロック内にいる且つ;が既出であるか
+    items = '|'.join([item for item in WITH_END_ITEMS])
 
     for index, line in enumerate(input_lines):
 
@@ -168,18 +162,16 @@ def generate_indent_level_list(input_lines):
             is_in_theorem = True
             is_proof_in_theorem = False
             continue
-
-        for item in WITH_END_ITEMS:
-            item_match = re.search(r'\b'+item+r'\b', line)
-            if item_match:
-                # schemeの場合
-                if item == 'scheme':
-                    indent_level += 1
-                    is_in_scheme = True
-                    semicolon_has_appeared_in_scheme = False
-                else:
-                    indent_level += 1
-                
+        
+        match_obj =  re.search(r'\b(' + items + r')\b', line)
+        if match_obj:
+            if match_obj.group(1) == 'scheme':
+                indent_level += 1
+                is_in_scheme = True
+                semicolon_has_appeared_in_scheme = False
+            else:
+                indent_level += 1
+        
     return indent_level_list
 
 
@@ -188,7 +180,7 @@ def indent_line(input_lines):
     各行の文頭に字下げ分のスペースを挿入する
     ラベルは文頭に置き,続く文はインデントレベルに揃える
     Args:
-        input_lines(list): 1行が1要素として格納された文字列
+        input_lines(list): 入力ファイル
     Returns:
         list: 字下げ分のスペースが挿入された文字列
     """
@@ -220,29 +212,25 @@ def insert_blankline(input_lines):
     """
     Text-Itemのブロック間に空行を挿入する
     Args:
-        input_lines(list): 1行が1要素として格納された文字列
+        input_lines(list): 入力ファイル
     Returns:
         list: input_fileに出現するブロック間に空行が挿入された状態
     """
     output_lines = []
-    prev_is_reserve = False 
+    prev_is_reserve = False
+    items = '|'.join([item for item in START_BLOSK_TAG_LIST])
     for line in input_lines:
-        for item in START_BLOSK_TAG_LIST:
-            item_match = re.search(r'\b'+item+r'\b', line)
-            if item_match:
-                # item含む行の直前に挿入
-                # reserveが続く場合は挿入なし
-                if item == "reserve":
-                    if prev_is_reserve == True:
-                        output_lines.append(line)
-                    else:
-                        output_lines.extend(['', line])
-                    prev_is_reserve = True
-                else:
-                    prev_is_reserve = False
-                    output_lines.extend(['', line])
-                break
+        if (re.search(r'\breserve\b', line)):
+            if prev_is_reserve == True:
+                output_lines.append(line)
+            else:
+                output_lines.extend(['', line]) 
+            prev_is_reserve = True
+        elif re.search(r'\b(' + items + r')\b', line):
+            prev_is_reserve = False
+            output_lines.extend(['', line])
         else:
+            prev_is_reserve = False
             output_lines.append(line)
     return output_lines
 
@@ -251,7 +239,7 @@ def trim_before_punctuation(input_lines):
     """
     カンマ,セミコロンの直前の空白を取り除く
     Args:
-        input_lines(list): 1行が1要素として格納された文字列
+        input_lines(list): 入力ファイル
     Returns:
         list: 句読点直前の空白が取り除かれた文字列
     """
@@ -266,7 +254,7 @@ def trim_immediately_inside_brackets(input_lines):
     """
     括弧の始めの直後、終わりの直前の空白を取り除く
     Args:
-        input_lines(list): 1行が1要素として格納された文字列
+        input_lines(list): 入力ファイル
     Returns:
         list: 括弧内部の空白が取り除かれた文字列
     """
@@ -281,7 +269,7 @@ def trim_interword(input_lines):
     """
     単語間の空白を1つづつにする
     Args:
-        input_lines(list): 1行が1要素として格納された文字列
+        input_lines(list): 入力ファイル
     Returns:
         list: 全単語間の空白が1つに整形された文字列
     """
@@ -302,7 +290,7 @@ def trim_extra_blank(input_lines):
     """
     行中の余分な空白を削除する処理をまとめた関数
     Args:
-        input_lines(list): 1行が1要素として格納された文字列
+        input_lines(list): 入力ファイル
     Returns:
         list: 行中の余分な空白が削除された文字列
     """
@@ -319,7 +307,7 @@ def process_text_proper(input_lines):
     """
     証明記述部分の処理をまとめた関数
     Args:
-        input_lines(list): 1行が1要素として格納された文字列
+        input_lines(list): 入力ファイル
     Returns:
         list: 整形された文字列
     """
@@ -334,10 +322,10 @@ def process_text_proper(input_lines):
 def process_lines(input_lines):
     """
     前処理後のファイルを整形する処理をまとめた関数
-    まず冒頭のコメント部,環境宣言部('environ'以下),証明記述部('begin'以下)を
-    分割し,それぞれ処理してから統合
+    環境宣言部('environ'以下),証明記述部('begin'以下)を分割し,
+    それぞれ処理してから統合
     Args:
-        input_lines(list): 1行が1要素として格納された文字列
+        input_lines(list): 入力ファイル
     Returns:
         list: 整形された文字列
     TODO:
@@ -347,10 +335,8 @@ def process_lines(input_lines):
     environment_declaration_lines = []
     text_proper_lines = []
 
-    environ_index = search_environ(input_lines)
     begin_index = search_begin(input_lines)
-    outline_comment_lines = input_lines[: environ_index]
-    environment_declaration_lines = input_lines[environ_index: begin_index]
+    environment_declaration_lines = input_lines[: begin_index]
     text_proper_lines = input_lines[begin_index:]
 
     #new_environment_declaration_lines = \
@@ -358,12 +344,7 @@ def process_lines(input_lines):
     new_environment_declaration_lines = environment_declaration_lines
     new_text_proper_lines = process_text_proper(text_proper_lines)
     
-    if len(outline_comment_lines)>0:
-        output_lines.extend(outline_comment_lines)
-        output_lines.append('')
-    output_lines.extend(new_environment_declaration_lines)
-    output_lines.append('')
-    output_lines.extend(new_text_proper_lines)
+    output_lines = new_environment_declaration_lines + new_text_proper_lines
 
     return output_lines
    
@@ -391,7 +372,7 @@ def split_with_semicolon(input_lines):
     コメント文を含む場合は連結しない
     ラベルが先頭に出現する場合は連結しない
     Args:
-        input_lines(list): 1行が1要素として格納された文字列
+        input_lines(list): 入力ファイル
     Returns:
         list: 整形された文字列
     """
@@ -452,7 +433,7 @@ def split_with_equalsign(input_lines):
     """
     '.='で行を分割して,文を作り直す
     Args:
-        input_lines(list): 1行が1要素として格納された文字列
+        input_lines(list): 入力ファイル
     Returns:
         list: '.='で行が分割された文字列
     """
@@ -479,15 +460,12 @@ def split_with_block_items(input_lines):
     'theorem'ブロックはタグごと
     'scheme'ブロックは識別子ごと
     Args:
-        input_lines(list): 1行が1要素として格納された文字列
+        input_lines(list): 入力ファイル
     Returns:
         list: 単語の前後で行が分割された文字列
     """
     output_lines = []
     for line in input_lines:
-        is_in_comment = False   # コメント文を含むかどうか
-        if '::' in line:
-            is_in_comment = True
         for item in SINGLE_TAG_ITEMS:
             item_match = re.search(r'\b'+item+r'\b', line)
             if item_match:
@@ -516,7 +494,7 @@ def preprocess_line(input_lines):
     入力ファイルに対して行う前処理をまとめた関数
     文頭と文末の余分な空白,改行のみの行は削除する
     Args:
-        input_lines(list): 1行が1要素として格納された文字列
+        input_lines(list): 入力ファイル
     Returns:
         list: 前処理済の文字列
     """
@@ -534,6 +512,70 @@ def preprocess_line(input_lines):
     return output_lines
 
 
+def extract_comment_part(input_lines):
+    """
+    入力ファイルからコメント部分を探して抽出する
+    コメント文とその前後に限り,入力ファイル通りに復元できるようにする
+    コメントがあった位置に印("::")をつける
+    Args:
+        input_lines(list): 入力ファイル
+    Returns:
+        output_lines(list): コメント部分が除外された入力ファイル
+        comment_status_list(list[3]): 抽出したコメントと周辺情報を格納
+            comment_part(str): 抽出したコメント文
+            is_only(boolian): コメント文単体の行ならTrue,混合ならFalse
+    """
+    output_lines = []
+    comment_status_list = []
+
+    new_input_lines = [line.strip() for line in input_lines]
+    for line in new_input_lines:
+        comment_obj = re.search(r'::', line)
+        if comment_obj:
+            comment_start_index = comment_obj.start()
+            # コメント文単体の場合
+            if comment_start_index == 0:
+                output_lines.append('::')
+                comment_part = line
+                is_only = True
+            # ソースコードとコメント文が混在する場合
+            else:
+                new_line = line[:comment_start_index].strip()
+                output_lines.extend([new_line, '::'])
+                comment_part = line[comment_start_index:]
+                is_only = False
+            comment_status_list.append([comment_part, is_only])
+        else:
+            output_lines.append(line)
+    return output_lines, comment_status_list
+
+
+def join_comment_part(input_lines, comment_status_list):
+    """
+    ソースコードとコメントを結合する
+    Args:
+        input_lines(list): 入力ファイル
+        comment_status_list(list[3]): 抽出したコメントと周辺情報を格納
+            comment_part(str): 抽出したコメント文
+            is_only(boolian): コメント文単体の行ならTrue,混合ならFalse
+    Returns:
+        output_lines(list): ソースコードとコメントを結合したファイル
+    """
+    output_lines = []
+    for line in input_lines:
+        if '::' in line:
+            comment_status = comment_status_list.pop(0)
+            comment_part = comment_status[0]
+            is_only = comment_status[1]
+            if is_only == False:
+                output_lines[-1] += (" " + comment_part)
+            else:
+                output_lines.append(comment_part)
+        else:
+            output_lines.append(line)
+    return output_lines
+
+
 def main():
     file_path = sys.argv[1]
     input_lines = []        # 入力ファイルの内容
@@ -543,12 +585,14 @@ def main():
 
     with open(file_path, "r") as f1:
         input_lines = f1.readlines()
-    
-    preprocessed_lines = preprocess_line(input_lines)
-    #preprocessed_lines = [line+'\n' for line in preprocessed_lines]
+
+    extracted_comment_part_lines, comment_status_list = \
+        extract_comment_part(input_lines)
+    preprocessed_lines = preprocess_line(extracted_comment_part_lines)
     processed_lines = process_lines(preprocessed_lines)
-    processed_lines = [line+'\n' for line in processed_lines]
-    output_lines = processed_lines
+    joined_comment_part_lines = \
+        join_comment_part(processed_lines, comment_status_list)
+    output_lines = [line+'\n' for line in joined_comment_part_lines]
     
     with open(file_path, "w") as f2:
         for line in output_lines:
