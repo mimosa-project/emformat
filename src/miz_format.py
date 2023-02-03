@@ -1,6 +1,6 @@
 import sys
 import os
-import yaml
+import json
 import re
 import utils.const as const
 
@@ -34,8 +34,8 @@ def main(argv):
 
 
 def load_settings():
-    with open("{}/settings.yml".format(os.path.dirname(__file__)), "r") as yml:
-        settings = yaml.safe_load(yml)
+    with open("{}/settings.json".format(os.path.dirname(__file__)), "r") as f:
+        settings = json.load(f)
         for k, v in settings.items():
             setattr(const, k, v)
 
