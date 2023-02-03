@@ -9,7 +9,6 @@ verify_ssl = true
 name = "testpypi"
 
 [packages]
-pyyaml = "*"
 mizcore = {version = "*", index = "testpypi"}
 pytest = "*"
 
