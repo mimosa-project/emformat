@@ -41,13 +41,59 @@ def load_settings():
 
 
 def format(input_lines, token_table, ast_root):
-    pass
+    output(space_adjusted_lines(token_table))
 
 
 def output(output_lines):
     # with open(miz_path, "w") as f:
     with open("data/result.miz", "w") as f:
         f.writelines([f"{line}\n" for line in output_lines])
+
+
+def space_adjusted_lines(token_table):
+    output_lines = []
+
+    for tokens in tokens_by_line(token_table):
+        output_line = ""
+        has_before_space = True
+        for token in tokens:
+            token_type = token.token_type
+
+            if token_type != TokenType.SYMBOL:
+                output_line += f" {token.text}" if has_before_space else token.text
+                has_before_space = True
+            else:
+                match token.special_symbol_type:
+                    case SpecialSymbolType.COMMA | SpecialSymbolType.SEMICOLON:
+                        output_line += token.text
+                        has_before_space = True
+                    case SpecialSymbolType.LEFT_PARENTHESIS | SpecialSymbolType.LEFT_BRACKET | SpecialSymbolType.LEFT_BRACE:
+                        output_line += f" {token.text}"
+                        has_before_space = False
+                    case SpecialSymbolType.RIGHT_PARENTHESIS | SpecialSymbolType.RIGHT_BRACKET | SpecialSymbolType.RIGHT_BRACE:
+                        output_line += token.text
+                        has_before_space = True
+                    case _:
+                        output_line += (
+                            f" {token.text}" if has_before_space else token.text
+                        )
+                        has_before_space = True
+
+        output_lines.append(output_line.strip())
+
+    return output_lines
+
+
+def tokens_by_line(token_table):
+    last_line_number = token_table.last_token.line_number
+    tokens_by_line = [[] for _ in range(last_line_number)]
+
+    for i in range(token_table.token_num):
+        token = token_table.token(i)
+        line_number = token.line_number
+        tokens_by_line[line_number - 1].append(token)
+
+    return tokens_by_line
 
 
 if __name__ == "__main__":
