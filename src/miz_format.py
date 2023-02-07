@@ -47,7 +47,7 @@ def format(input_lines, token_table, ast_root):
 def output(output_lines):
     # with open(miz_path, "w") as f:
     with open("data/result.miz", "w") as f:
-        f.writelines(output_lines)
+        f.writelines([f"{line}\n" for line in output_lines])
 
 
 if __name__ == "__main__":
