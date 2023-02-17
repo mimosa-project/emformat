@@ -6,6 +6,7 @@ import utils.const as const
 
 from py_miz_controller import (
     MizController,
+    ASTToken,
     TokenType,
     ElementType,
     StatementType,
@@ -55,33 +56,62 @@ def space_adjusted_lines(token_table):
 
     for tokens in tokens_by_line(token_table):
         output_line = ""
-        has_before_space = True
-        for token in tokens:
-            token_type = token.token_type
+        has_before_space = False
 
-            if token_type != TokenType.SYMBOL:
-                output_line += f" {token.text}" if has_before_space else token.text
-                has_before_space = True
-            else:
-                match token.special_symbol_type:
-                    case SpecialSymbolType.COMMA | SpecialSymbolType.SEMICOLON:
-                        output_line += token.text
-                        has_before_space = True
-                    case SpecialSymbolType.LEFT_PARENTHESIS | SpecialSymbolType.LEFT_BRACKET | SpecialSymbolType.LEFT_BRACE:
-                        output_line += f" {token.text}"
-                        has_before_space = False
-                    case SpecialSymbolType.RIGHT_PARENTHESIS | SpecialSymbolType.RIGHT_BRACKET | SpecialSymbolType.RIGHT_BRACE:
-                        output_line += token.text
-                        has_before_space = True
-                    case _:
-                        output_line += (
-                            f" {token.text}" if has_before_space else token.text
-                        )
-                        has_before_space = True
+        for token, next_token in zip(tokens, tokens[1:] + [""]):
+            match token.token_type:
+                case TokenType.IDENTIFIER:
+                    match token.identifier_type:
+                        case IdentifierType.LABEL:
+                            output_line += connecting_text(token.text, has_before_space)
+                            has_before_space = not (type_is_colon(next_token))
+                        case _:
+                            output_line += connecting_text(token.text, has_before_space)
+                            has_before_space = True
+                case TokenType.SYMBOL:
+                    match token.special_symbol_type:
+                        case SpecialSymbolType.COMMA | SpecialSymbolType.SEMICOLON:
+                            output_line += token.text
+                            has_before_space = True
+                        case SpecialSymbolType.LEFT_PARENTHESIS | SpecialSymbolType.LEFT_BRACKET | SpecialSymbolType.LEFT_BRACE:
+                            output_line += f" {token.text}"
+                            has_before_space = False
+                        case SpecialSymbolType.RIGHT_PARENTHESIS | SpecialSymbolType.RIGHT_BRACKET | SpecialSymbolType.RIGHT_BRACE:
+                            output_line += token.text
+                            has_before_space = True
+                        case SpecialSymbolType.COLON:
+                            output_line += connecting_text(token.text, has_before_space)
+                            has_before_space = not (type_is_label(next_token))
+                        case _:
+                            output_line += connecting_text(token.text, has_before_space)
+                            has_before_space = True
+                case _:
+                    output_line += connecting_text(token.text, has_before_space)
+                    has_before_space = True
 
         output_lines.append(output_line.strip())
 
     return output_lines
+
+
+def connecting_text(text, condition_with_before_space):
+    return f" {text}" if condition_with_before_space else text
+
+
+def type_is_label(token):
+    return (
+        isinstance(token, ASTToken)
+        and token.token_type == TokenType.IDENTIFIER
+        and token.identifier_type == IdentifierType.LABEL
+    )
+
+
+def type_is_colon(token):
+    return (
+        isinstance(token, ASTToken)
+        and token.token_type == TokenType.SYMBOL
+        and token.special_symbol_type == SpecialSymbolType.COLON
+    )
 
 
 def tokens_by_line(token_table):
