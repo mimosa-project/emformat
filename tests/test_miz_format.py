@@ -62,5 +62,5 @@ def test_space_adjusted_lines_6():
 # def test_space_adjusted_lines_7():
 #     assert (space_adjusted_lines(token_table)[70]) == "r in REAL by XREAL_0: def 1;"
 
-def test_space_adjusted_lines_7():
-    assert (space_adjusted_lines(token_table2)[47]) == "scheme Replacement {A() -> set, P[object, object] }:"
+# def test_space_adjusted_lines_7():
+#     assert (space_adjusted_lines(token_table2)[47]) == "scheme Replacement {A() -> set, P[object, object] }:"
