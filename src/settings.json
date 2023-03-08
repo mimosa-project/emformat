@@ -16,6 +16,10 @@
     "provided",
     "existence",
     "uniqueness",
+    "coherence",
+    "compatibility",
+    "consistency",
+    "reducibility",
     "end"
   ],
   "TOP_OF_BLOCK_TAGS": [
