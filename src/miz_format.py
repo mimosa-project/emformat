@@ -2,7 +2,7 @@ import sys
 import os
 import json
 import re
-import utils.const as const
+import utils.option as option
 
 from py_miz_controller import (
     MizController,
@@ -38,7 +38,7 @@ def load_settings():
     with open("{}/settings.json".format(os.path.dirname(__file__)), "r") as f:
         settings = json.load(f)
         for k, v in settings.items():
-            setattr(const, k, v)
+            setattr(option, k, v)
 
 
 def format(input_lines, token_table, ast_root):
