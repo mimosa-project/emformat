@@ -38,7 +38,7 @@ def test_space_adjusted_lines_1():
 def test_space_adjusted_lines_2():
     assert (
         space_adjusted_lines(token_table)[64]
-    ) == "{r where r is Real : r > a} c= the carrier of R^1"
+    ) == "{r where r is Real: r > a} c= the carrier of R^1"
 
 
 def test_space_adjusted_lines_3():
