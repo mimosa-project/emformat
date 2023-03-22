@@ -29,5 +29,25 @@
     "notation",
     "theorem",
     "scheme"
+  ],
+  "CUT_CENTER_SPACE": {
+    ": __label": true,
+    "__label :": true
+  },
+  "CUT_LEFT_SPACE": [
+    ":",
+    ",",
+    ";",
+    ")",
+    "]",
+    "}",
+    "sch",
+    "def"
+  ],
+  "CUT_RIGHT_SPACE": [
+    ";",
+    "(",
+    "[",
+    "{"
   ]
 }

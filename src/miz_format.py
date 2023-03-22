@@ -37,12 +37,12 @@ def main(argv):
 def load_settings():
     with open("{}/settings.json".format(os.path.dirname(__file__)), "r") as f:
         settings = json.load(f)
-        for k, v in settings.items():
-            setattr(option, k, v)
+        for setting_key, setting_value in settings.items():
+            setattr(option, setting_key, setting_value_formatted(setting_value))
 
 
 def format(input_lines, token_table, ast_root):
-    output(space_adjusted_lines(token_table))
+    output(space_adjusted_lines(tokens_by_line(token_table)))
 
 
 def output(output_lines):
@@ -51,67 +51,33 @@ def output(output_lines):
         f.writelines([f"{line}\n" for line in output_lines])
 
 
-def space_adjusted_lines(token_table):
-    output_lines = []
-
-    for tokens in tokens_by_line(token_table):
-        output_line = ""
-        has_before_space = False
-
-        for token, next_token in zip(tokens, tokens[1:] + [""]):
-            match token.token_type:
-                case TokenType.IDENTIFIER:
-                    match token.identifier_type:
-                        case IdentifierType.LABEL:
-                            output_line += connecting_text(token.text, has_before_space)
-                            has_before_space = not (type_is_colon(next_token))
-                        case _:
-                            output_line += connecting_text(token.text, has_before_space)
-                            has_before_space = True
-                case TokenType.SYMBOL:
-                    match token.special_symbol_type:
-                        case SpecialSymbolType.COMMA | SpecialSymbolType.SEMICOLON:
-                            output_line += token.text
-                            has_before_space = True
-                        case SpecialSymbolType.LEFT_PARENTHESIS | SpecialSymbolType.LEFT_BRACKET | SpecialSymbolType.LEFT_BRACE:
-                            output_line += f" {token.text}"
-                            has_before_space = False
-                        case SpecialSymbolType.RIGHT_PARENTHESIS | SpecialSymbolType.RIGHT_BRACKET | SpecialSymbolType.RIGHT_BRACE:
-                            output_line += token.text
-                            has_before_space = True
-                        case SpecialSymbolType.COLON:
-                            output_line += connecting_text(token.text, has_before_space)
-                            has_before_space = not (type_is_label(next_token))
-                        case _:
-                            output_line += connecting_text(token.text, has_before_space)
-                            has_before_space = True
-                case _:
-                    output_line += connecting_text(token.text, has_before_space)
-                    has_before_space = True
-
-        output_lines.append(output_line.strip())
-
-    return output_lines
+# 設定値が複合キーを持つかどうかを判定
+def has_composite_key(setting_value):
+    if not (isinstance(setting_value, dict)):
+        return False
+    for k, v in setting_value.items():
+        if len(k.split()) > 1:
+            return True
+    return False
 
 
-def connecting_text(text, condition_with_before_space):
-    return f" {text}" if condition_with_before_space else text
+# TODO: 名前どうにかする
+# 複合キーの型を文字列からタプルへ変換する
+def setting_value_formatted(setting_value):
+    if has_composite_key(setting_value):
+        return {tuple(k.split()): v for k, v in setting_value.items()}
+    else:
+        return setting_value
 
 
-def type_is_label(token):
-    return (
-        isinstance(token, ASTToken)
-        and token.token_type == TokenType.IDENTIFIER
-        and token.identifier_type == IdentifierType.LABEL
-    )
-
-
-def type_is_colon(token):
-    return (
-        isinstance(token, ASTToken)
-        and token.token_type == TokenType.SYMBOL
-        and token.special_symbol_type == SpecialSymbolType.COLON
-    )
+# TODO: 名前どうにかする
+# トークンを、設定ファイルのスペース調整の記述形式に変更する
+def token_formatted_to_setting_value(token):
+    if token.token_type == TokenType.IDENTIFIER:
+        identifier_type = str(token.identifier_type)
+        return f"__{identifier_type[identifier_type.index('.')+1:].lower()}"
+    else:
+        return token.text
 
 
 def tokens_by_line(token_table):
@@ -124,6 +90,73 @@ def tokens_by_line(token_table):
         tokens_by_line[line_number - 1].append(token)
 
     return tokens_by_line
+
+
+# 実際にはmizcore側に実装
+def is_separable_tokens(tokens):
+    return True
+
+
+def needs_omit_left_space(tokens):
+    omit_left_space = [False for _ in range(len(tokens))]
+
+    for current_pos in range(len(tokens)):
+        if current_pos == 0:
+            omit_left_space[current_pos] = True
+            continue
+
+        token_str = token_formatted_to_setting_value(tokens[current_pos])
+        left_token_str = token_formatted_to_setting_value(tokens[current_pos - 1])
+
+        if (left_token_str, token_str) in option.CUT_CENTER_SPACE:
+            omit_left_space[current_pos] = option.CUT_CENTER_SPACE[(left_token_str, token_str)]
+        else:
+            if token_str in option.CUT_LEFT_SPACE:
+                omit_left_space[current_pos] = True
+            if left_token_str in option.CUT_RIGHT_SPACE:
+                omit_left_space[current_pos] = True
+
+    return omit_left_space
+
+
+def can_omit_left_space(tokens):
+    omit_left_space = [False for _ in range(len(tokens))]
+
+    begin_pos = 0
+    for current_pos in range(len(tokens)):
+        if current_pos == 0:
+            omit_left_space[current_pos] = True
+            continue
+
+        end_pos = current_pos + 1
+
+        is_separable = is_separable_tokens(tokens[begin_pos:end_pos])
+        omit_left_space[current_pos] = is_separable
+
+        if not (is_separable):
+            begin_pos = current_pos
+
+    # return omit_left_space
+    return [True for _ in range(len(tokens))]
+
+
+def space_adjusted_line(tokens):
+    output_line = ""
+    omit_left_space = [
+        i & j for i, j in zip(needs_omit_left_space(tokens), can_omit_left_space(tokens))
+    ]
+    for pos in range(len(tokens)):
+        output_line += f"{'' if omit_left_space[pos] else ' '}{tokens[pos].text}"
+
+    return output_line
+
+
+def space_adjusted_lines(tokens_by_line):
+    output_lines = []
+
+    for tokens in tokens_by_line:
+        output_lines.append(space_adjusted_line(tokens))
+    return output_lines
 
 
 if __name__ == "__main__":
