@@ -19,6 +19,41 @@ token_table = miz_controller.token_table
 token_table2 = miz_controller2.token_table
 
 
+def test_has_composite_key1():
+    setting_value = 100
+    assert (has_composite_key(setting_value)) == False
+
+
+def test_has_composite_key2():
+    setting_value = {":": True}
+    assert (has_composite_key(setting_value)) == False
+
+
+def test_has_composite_key3():
+    setting_value = {": __label": True}
+    assert (has_composite_key(setting_value)) == True
+
+
+def test_setting_value_formatted1():
+    setting_value = 100
+    assert (setting_value_formatted(setting_value)) == 100
+
+
+def test_setting_value_formatted2():
+    setting_value = {": __label": True}
+    assert (setting_value_formatted(setting_value)) == {(":", "__label"): True}
+
+
+def test_token_formatted_to_setting_value1():
+    token = token_table.token(329)
+    assert (token_formatted_to_setting_value(token)) == "__label"
+
+
+def test_token_formatted_to_setting_value2():
+    token = token_table.token(330)
+    assert (token_formatted_to_setting_value(token)) == ":"
+
+
 def test_tokens_by_line():
     assert ([token.text for token in tokens_by_line(token_table)[44]]) == [
         "reserve",
@@ -29,38 +64,61 @@ def test_tokens_by_line():
     ]
 
 
-def test_space_adjusted_lines_1():
+def test_needs_omit_left_space():
+    assert (needs_omit_left_space(tokens_by_line(token_table)[44])) == [
+        True,
+        False,
+        False,
+        False,
+        True,
+    ]
+
+
+# def test_can_omit_left_space():
+#     assert (can_omit_left_space(tokens_by_line(token_table)[44])) == [
+#         True,
+#         False,
+#         False,
+#         False,
+#         True,
+#     ]
+
+
+def test_space_adjusted_line1():
     assert (
-        space_adjusted_lines(token_table)[384]
+        space_adjusted_line(tokens_by_line(token_table)[384])
     ) == "then g5 . p = (r1 / r2 - a) / b by A11, A18;"
 
 
-def test_space_adjusted_lines_2():
+def test_space_adjusted_line2():
     assert (
-        space_adjusted_lines(token_table)[64]
+        space_adjusted_line(tokens_by_line(token_table)[64])
     ) == "{r where r is Real: r > a} c= the carrier of R^1"
 
 
-def test_space_adjusted_lines_3():
+def test_space_adjusted_line3():
     assert (
-        space_adjusted_lines(token_table)[1700]
+        space_adjusted_line(tokens_by_line(token_table)[1700])
     ) == "defpred Q [Point of TOP-REAL 2] means $1 `1 <= 0;"
 
 
-def test_space_adjusted_lines_4():
-    assert (space_adjusted_lines(token_table)[596]) == ":Def1:"
+def test_space_adjusted_line4():
+    assert (space_adjusted_line(tokens_by_line(token_table)[596])) == ":Def1:"
 
 
-def test_space_adjusted_lines_5():
-    assert (space_adjusted_lines(token_table)[174]) == "A7: K = f .: K and"
+def test_space_adjusted_line5():
+    assert (space_adjusted_line(tokens_by_line(token_table)[174])) == "A7: K = f .: K and"
 
 
-def test_space_adjusted_lines_6():
-    assert (space_adjusted_lines(token_table)[54]) == "theorem Th1:"
+def test_space_adjusted_line6():
+    assert (space_adjusted_line(tokens_by_line(token_table)[54])) == "theorem Th1:"
 
 
-# def test_space_adjusted_lines_7():
-#     assert (space_adjusted_lines(token_table)[70]) == "r in REAL by XREAL_0: def 1;"
+def test_space_adjusted_line7():
+    assert (space_adjusted_line(tokens_by_line(token_table)[70])) == "r in REAL by XREAL_0:def 1;"
 
-# def test_space_adjusted_lines_7():
-#     assert (space_adjusted_lines(token_table2)[47]) == "scheme Replacement {A() -> set, P[object, object] }:"
+
+# def test_space_adjusted_line8():
+#     assert (
+#         space_adjusted_line(tokens_by_line(token_table2)[47])
+#     ) == "scheme Replacement {A() -> set, P[object, object]}:"
