@@ -54,8 +54,8 @@ def test_tokens_by_line():
     ]
 
 
-def test_needs_omit_left_space():
-    assert (needs_omit_left_space(tokens_by_line(token_table)[44])) == [
+def test_require_to_omit_left_space():
+    assert (require_to_omit_left_space(tokens_by_line(token_table)[44])) == [
         True,
         False,
         False,
