@@ -34,16 +34,6 @@ def test_has_composite_key3():
     assert (has_composite_key(setting_value)) == True
 
 
-def test_setting_value_formatted1():
-    setting_value = 100
-    assert (setting_value_formatted(setting_value)) == 100
-
-
-def test_setting_value_formatted2():
-    setting_value = {": __label": True}
-    assert (setting_value_formatted(setting_value)) == {(":", "__label"): True}
-
-
 def test_token_formatted_to_setting_value1():
     token = token_table.token(329)
     assert (token_formatted_to_setting_value(token)) == "__label"

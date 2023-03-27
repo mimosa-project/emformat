@@ -38,7 +38,10 @@ def load_settings():
     with open("{}/settings.json".format(os.path.dirname(__file__)), "r") as f:
         settings = json.load(f)
         for setting_key, setting_value in settings.items():
-            setattr(option, setting_key, setting_value_formatted(setting_value))
+            # 設定ファイルでは複合キーを文字列で表現しているため、タプルに変換する
+            if has_composite_key(setting_value):
+                setting_value = {tuple(k.split()): v for k, v in setting_value.items()}
+            setattr(option, setting_key, setting_value)
 
 
 def format(input_lines, token_table, ast_root):
@@ -59,15 +62,6 @@ def has_composite_key(setting_value):
         if len(k.split()) > 1:
             return True
     return False
-
-
-# TODO: 名前どうにかする
-# 複合キーの型を文字列からタプルへ変換する
-def setting_value_formatted(setting_value):
-    if has_composite_key(setting_value):
-        return {tuple(k.split()): v for k, v in setting_value.items()}
-    else:
-        return setting_value
 
 
 # TODO: 名前どうにかする
