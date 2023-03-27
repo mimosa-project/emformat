@@ -65,7 +65,8 @@ def has_composite_key(setting_value):
 
 
 # TODO: 名前どうにかする
-# トークンを、設定ファイルのスペース調整の記述形式に変更する
+# TokenTypeが Identifier の場合、__[identifier_type] の形に変換する
+# Symbol の場合はそのままのテキスト
 def token_formatted_to_setting_value(token):
     if token.token_type == TokenType.IDENTIFIER:
         identifier_type = str(token.identifier_type)
