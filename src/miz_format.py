@@ -41,7 +41,8 @@ def load_settings():
             # CUT_CENTER_SPACE の場合、型チェックを行う
             if setting_key == "CUT_CENTER_SPACE":
                 if not format_is_valid(setting_value):
-                    pass
+                    print("設定ファイルのCUT_CENTER_SPACEの値が不適切です。")
+                    sys.exit(1)
 
                 # 複合キーの型変換
                 setting_value = {tuple(k.split()): v for k, v in setting_value.items()}
