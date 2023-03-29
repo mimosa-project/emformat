@@ -19,17 +19,19 @@ token_table = miz_controller.token_table
 token_table2 = miz_controller2.token_table
 
 
-def test_has_composite_key1():
+
+
+def test_format_is_valid1():
     cut_center_space_value = 100
     assert (format_is_valid(cut_center_space_value)) == False
 
 
-def test_has_composite_key2():
+def test_format_is_valid2():
     cut_center_space_value = {":": True}
     assert (format_is_valid(cut_center_space_value)) == False
 
 
-def test_has_composite_key3():
+def test_format_is_valid3():
     cut_center_space_value = {": __label": True}
     assert (format_is_valid(cut_center_space_value)) == True
 
