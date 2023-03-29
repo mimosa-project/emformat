@@ -73,6 +73,8 @@ def format_is_valid(cut_center_space_value):
 # TODO: 名前どうにかする
 # TokenTypeが Identifier の場合、__[identifier_type] の形に変換する
 # Symbol の場合はそのままのテキスト
+
+# token.identifier_type = IdentifierType.LABEL の場合、"__label" を返す
 def token_formatted_to_setting_value(token):
     if token.token_type == TokenType.IDENTIFIER:
         identifier_type = str(token.identifier_type)
