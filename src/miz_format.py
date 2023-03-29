@@ -96,7 +96,7 @@ def is_separable_tokens(tokens):
     return True
 
 
-def require_to_omit_left_space(tokens):
+def determine_space_omission(tokens):
     omit_left_space = [False for _ in range(len(tokens))]
 
     for current_pos in range(len(tokens)):
@@ -142,7 +142,7 @@ def can_omit_left_space(tokens):
 def space_adjusted_line(tokens):
     output_line = ""
     omit_left_space = [
-        i & j for i, j in zip(require_to_omit_left_space(tokens), can_omit_left_space(tokens))
+        i & j for i, j in zip(determine_space_omission(tokens), can_omit_left_space(tokens))
     ]
     for pos in range(len(tokens)):
         output_line += f"{'' if omit_left_space[pos] else ' '}{tokens[pos].text}"
