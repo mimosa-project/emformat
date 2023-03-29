@@ -97,57 +97,70 @@ def is_separable_tokens(tokens):
 
 
 def determine_space_omission(tokens):
-    omit_left_space = [False for _ in range(len(tokens))]
+    no_space_tokens_list = []
+    no_space_tokens = []
 
     for current_pos in range(len(tokens)):
+        token_text = tokens[current_pos].text
+
         if current_pos == 0:
-            omit_left_space[current_pos] = True
+            no_space_tokens.append(token_text)
+            if len(tokens) == 1:
+                no_space_tokens_list.append(no_space_tokens)
             continue
 
-        token_str = convert_to_token_representative_name(tokens[current_pos])
-        left_token_str = convert_to_token_representative_name(tokens[current_pos - 1])
+        representative_name = convert_to_token_representative_name(tokens[current_pos])
+        left_representative_name = convert_to_token_representative_name(tokens[current_pos - 1])
 
-        if (left_token_str, token_str) in option.CUT_CENTER_SPACE:
-            omit_left_space[current_pos] = option.CUT_CENTER_SPACE[(left_token_str, token_str)]
+        if (
+            left_representative_name,
+            representative_name,
+        ) in option.CUT_CENTER_SPACE and option.CUT_CENTER_SPACE[
+            (left_representative_name, representative_name)
+        ]:
+            no_space_tokens.append(token_text)
+        elif (
+            representative_name in option.CUT_LEFT_SPACE
+            or left_representative_name in option.CUT_RIGHT_SPACE
+        ):
+            no_space_tokens.append(token_text)
         else:
-            if token_str in option.CUT_LEFT_SPACE:
-                omit_left_space[current_pos] = True
-            if left_token_str in option.CUT_RIGHT_SPACE:
-                omit_left_space[current_pos] = True
+            no_space_tokens_list.extend(sparable_tokens_list(no_space_tokens))
+            no_space_tokens = [token_text]
 
-    return omit_left_space
+        if current_pos == len(tokens) - 1:
+            no_space_tokens_list.extend(sparable_tokens_list(no_space_tokens))
+
+    return no_space_tokens_list
 
 
-def can_omit_left_space(tokens):
-    omit_left_space = [False for _ in range(len(tokens))]
-
+def sparable_tokens_list(tokens):
+    sparable_tokens_list = []
     begin_pos = 0
-    for current_pos in range(len(tokens)):
-        if current_pos == 0:
-            omit_left_space[current_pos] = True
-            continue
+    end_pos = len(tokens)
 
-        end_pos = current_pos + 1
+    while True:
+        if is_separable_tokens(tokens[begin_pos:end_pos]):
+            sparable_tokens_list.append(tokens[begin_pos:end_pos])
+            if end_pos == len(tokens):
+                break
 
-        is_separable = is_separable_tokens(tokens[begin_pos:end_pos])
-        omit_left_space[current_pos] = is_separable
+            begin_pos = end_pos
+            end_pos = len(tokens)
+        else:
+            end_pos -= 1
 
-        if not (is_separable):
-            begin_pos = current_pos
-
-    # return omit_left_space
-    return [True for _ in range(len(tokens))]
+    return sparable_tokens_list
 
 
 def space_adjusted_line(tokens):
     output_line = ""
-    omit_left_space = [
-        i & j for i, j in zip(determine_space_omission(tokens), can_omit_left_space(tokens))
-    ]
-    for pos in range(len(tokens)):
-        output_line += f"{'' if omit_left_space[pos] else ' '}{tokens[pos].text}"
+    no_space_tokens_list = determine_space_omission(tokens)
 
-    return output_line
+    for tokens in no_space_tokens_list:
+        output_line += f" {''.join(tokens)}"
+
+    return output_line.lstrip()
 
 
 def space_adjusted_lines(tokens_by_line):

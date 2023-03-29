@@ -54,6 +54,22 @@ def test_tokens_by_line():
     ]
 
 
+def test_determine_space_omission1():
+    assert (determine_space_omission(tokens_by_line(token_table)[596])) == [
+        [":", "Def1", ":"],
+    ]
+
+
+def test_determine_space_omissio2():
+    assert (determine_space_omission(tokens_by_line(token_table)[70])) == [
+        ["r"],
+        ["in"],
+        ["REAL"],
+        ["by"],
+        ["XREAL_0", ":", "def"],
+        ["1", ";"],
+    ]
+
 
 def test_space_adjusted_line1():
     assert (
