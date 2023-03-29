@@ -20,18 +20,18 @@ token_table2 = miz_controller2.token_table
 
 
 def test_has_composite_key1():
-    setting_value = 100
-    assert (has_composite_key(setting_value)) == False
+    cut_center_space_value = 100
+    assert (format_is_valid(cut_center_space_value)) == False
 
 
 def test_has_composite_key2():
-    setting_value = {":": True}
-    assert (has_composite_key(setting_value)) == False
+    cut_center_space_value = {":": True}
+    assert (format_is_valid(cut_center_space_value)) == False
 
 
 def test_has_composite_key3():
-    setting_value = {": __label": True}
-    assert (has_composite_key(setting_value)) == True
+    cut_center_space_value = {": __label": True}
+    assert (format_is_valid(cut_center_space_value)) == True
 
 
 def test_token_formatted_to_setting_value1():

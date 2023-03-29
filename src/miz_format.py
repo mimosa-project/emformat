@@ -38,9 +38,14 @@ def load_settings():
     with open("{}/settings.json".format(os.path.dirname(__file__)), "r") as f:
         settings = json.load(f)
         for setting_key, setting_value in settings.items():
-            # 設定ファイルでは複合キーを文字列で表現しているため、タプルに変換する
-            if has_composite_key(setting_value):
+            # CUT_CENTER_SPACE の場合、型チェックを行う
+            if setting_key == "CUT_CENTER_SPACE":
+                if not format_is_valid(setting_value):
+                    pass
+
+                # 複合キーの型変換
                 setting_value = {tuple(k.split()): v for k, v in setting_value.items()}
+
             setattr(option, setting_key, setting_value)
 
 
@@ -54,14 +59,15 @@ def output(output_lines):
         f.writelines([f"{line}\n" for line in output_lines])
 
 
-# 設定値が複合キーを持つかどうかを判定
-def has_composite_key(setting_value):
-    if not (isinstance(setting_value, dict)):
+def format_is_valid(cut_center_space_value):
+    if not (isinstance(cut_center_space_value, dict)):
         return False
-    for k, v in setting_value.items():
-        if len(k.split()) > 1:
-            return True
-    return False
+
+    for key in cut_center_space_value:
+        if len(key.split()) != 2:
+            return False
+
+    return True
 
 
 # TODO: 名前どうにかする
