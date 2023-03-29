@@ -34,14 +34,14 @@ def test_has_composite_key3():
     assert (format_is_valid(cut_center_space_value)) == True
 
 
-def test_token_formatted_to_setting_value1():
+def test_convert_to_token_representative_name1():
     token = token_table.token(329)
-    assert (token_formatted_to_setting_value(token)) == "__label"
+    assert (convert_to_token_representative_name(token)) == "__label"
 
 
-def test_token_formatted_to_setting_value2():
+def test_convert_to_token_representative_name2():
     token = token_table.token(330)
-    assert (token_formatted_to_setting_value(token)) == ":"
+    assert (convert_to_token_representative_name(token)) == ":"
 
 
 def test_tokens_by_line():

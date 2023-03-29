@@ -70,12 +70,8 @@ def format_is_valid(cut_center_space_value):
     return True
 
 
-# TODO: 名前どうにかする
-# TokenTypeが Identifier の場合、__[identifier_type] の形に変換する
-# Symbol の場合はそのままのテキスト
-
 # token.identifier_type = IdentifierType.LABEL の場合、"__label" を返す
-def token_formatted_to_setting_value(token):
+def convert_to_token_representative_name(token):
     if token.token_type == TokenType.IDENTIFIER:
         identifier_type = str(token.identifier_type)
         return f"__{identifier_type[identifier_type.index('.')+1:].lower()}"
@@ -108,8 +104,8 @@ def require_to_omit_left_space(tokens):
             omit_left_space[current_pos] = True
             continue
 
-        token_str = token_formatted_to_setting_value(tokens[current_pos])
-        left_token_str = token_formatted_to_setting_value(tokens[current_pos - 1])
+        token_str = convert_to_token_representative_name(tokens[current_pos])
+        left_token_str = convert_to_token_representative_name(tokens[current_pos - 1])
 
         if (left_token_str, token_str) in option.CUT_CENTER_SPACE:
             omit_left_space[current_pos] = option.CUT_CENTER_SPACE[(left_token_str, token_str)]
