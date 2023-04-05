@@ -113,12 +113,7 @@ def determine_space_omission(tokens):
         representative_name = convert_to_token_representative_name(tokens[current_pos])
         left_representative_name = convert_to_token_representative_name(tokens[current_pos - 1])
 
-        if (
-            left_representative_name,
-            representative_name,
-        ) in option.CUT_CENTER_SPACE and option.CUT_CENTER_SPACE[
-            (left_representative_name, representative_name)
-        ]:
+        if option.CUT_CENTER_SPACE.get((left_representative_name, representative_name)):
             no_space_tokens.append(token_text)
         elif (
             representative_name in option.CUT_LEFT_SPACE
