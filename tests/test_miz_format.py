@@ -21,19 +21,19 @@ token_table2 = miz_controller2.token_table
 
 
 
-def test_format_is_valid1():
+def test_cut_center_space_format_is_valid1():
     cut_center_space_value = 100
-    assert (format_is_valid(cut_center_space_value)) == False
+    assert (cut_center_space_format_is_valid(cut_center_space_value)) == False
 
 
-def test_format_is_valid2():
+def test_cut_center_space_format_is_valid2():
     cut_center_space_value = {":": True}
-    assert (format_is_valid(cut_center_space_value)) == False
+    assert (cut_center_space_format_is_valid(cut_center_space_value)) == False
 
 
-def test_format_is_valid3():
+def test_cut_center_space_format_is_valid3():
     cut_center_space_value = {": __label": True}
-    assert (format_is_valid(cut_center_space_value)) == True
+    assert (cut_center_space_format_is_valid(cut_center_space_value)) == True
 
 
 def test_convert_to_token_representative_name1():

@@ -40,7 +40,7 @@ def load_settings():
         for setting_key, setting_value in settings.items():
             # CUT_CENTER_SPACE の場合、型チェックを行う
             if setting_key == "CUT_CENTER_SPACE":
-                if not format_is_valid(setting_value):
+                if not cut_center_space_format_is_valid(setting_value):
                     print("設定ファイルのCUT_CENTER_SPACEの値が不適切です。")
                     sys.exit(1)
 
@@ -60,7 +60,7 @@ def output(output_lines):
         f.writelines([f"{line}\n" for line in output_lines])
 
 
-def format_is_valid(cut_center_space_value):
+def cut_center_space_format_is_valid(cut_center_space_value):
     if not (isinstance(cut_center_space_value, dict)):
         return False
 
@@ -126,23 +126,23 @@ def determine_space_omission(tokens):
         ):
             no_space_tokens.append(token_text)
         else:
-            no_space_tokens_list.extend(sparable_tokens_list(no_space_tokens))
+            no_space_tokens_list.extend(separable_tokens_list(no_space_tokens))
             no_space_tokens = [token_text]
 
         if current_pos == len(tokens) - 1:
-            no_space_tokens_list.extend(sparable_tokens_list(no_space_tokens))
+            no_space_tokens_list.extend(separable_tokens_list(no_space_tokens))
 
     return no_space_tokens_list
 
 
-def sparable_tokens_list(tokens):
-    sparable_tokens_list = []
+def separable_tokens_list(tokens):
+    separable_tokens_list = []
     begin_pos = 0
     end_pos = len(tokens)
 
     while True:
         if is_separable_tokens(tokens[begin_pos:end_pos]):
-            sparable_tokens_list.append(tokens[begin_pos:end_pos])
+            separable_tokens_list.append(tokens[begin_pos:end_pos])
             if end_pos == len(tokens):
                 break
 
@@ -151,7 +151,7 @@ def sparable_tokens_list(tokens):
         else:
             end_pos -= 1
 
-    return sparable_tokens_list
+    return separable_tokens_list
 
 
 def space_adjusted_line(tokens):
