@@ -167,5 +167,62 @@ def space_adjusted_lines(tokens_by_line):
     return output_lines
 
 
+def adjust_blank_line(tokens_by_line):
+    output_tokens_by_line = []
+
+    # 空行の挿入
+    for current_line, tokens in enumerate(tokens_by_line):
+        if tokens == []:
+            output_tokens_by_line.append(tokens)
+            continue
+
+        first_token_text = tokens[0].text
+        before_comment_line_number = count_before_comment_line_number(tokens_by_line, current_line)
+        add_blank_line_i = (
+            -1 * before_comment_line_number
+            if before_comment_line_number
+            else len(output_tokens_by_line)
+        )
+        if first_token_text in option.USE_BEFORE_BLANK_LINE:
+            output_tokens_by_line.insert(add_blank_line_i, [])
+            output_tokens_by_line.append(tokens)
+        elif first_token_text in option.USE_BEFORE_AND_AFTER_BLANK_LINE:
+            output_tokens_by_line.insert(add_blank_line_i, [])
+            output_tokens_by_line.extend([tokens, []])
+        else:
+            output_tokens_by_line.append(tokens)
+
+    first_no_empty_array_i = find_first_no_empty_array_i(output_tokens_by_line)
+
+    return omit_continuous_values(output_tokens_by_line[first_no_empty_array_i:], [])
+
+
+def count_before_comment_line_number(tokens_by_line, target_line):
+    comment_line_number = 0
+    for line in reversed(range(target_line)):
+        if tokens_by_line[line] == []:
+            return comment_line_number
+
+        first_token_type = tokens_by_line[line][0].token_type
+        if first_token_type != TokenType.COMMENT:
+            return comment_line_number
+
+        comment_line_number += 1
+
+    return comment_line_number
+
+
+def omit_continuous_values(array, target):
+    output = [array[0]]
+    output.extend([j for i, j in zip(array, array[1:]) if j != target or i != j])
+    return output
+
+
+def find_first_no_empty_array_i(array):
+    for i, elm in enumerate(array):
+        if elm != []:
+            return i
+
+
 if __name__ == "__main__":
     main(sys.argv)
