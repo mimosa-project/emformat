@@ -1,0 +1,31 @@
+
+
+
+environ
+vocabularies XBOOLE_0, SUBSET_1, ORDINAL1;
+notations XBOOLE_0, SUBSET_1, ORDINAL1;
+begin
+::
+::
+theorem
+{} is Element of omega
+proof
+{} in omega by ORDINAL1:def 11;
+hence thesis by SUBSET_1:def 1;
+end;
+definition
+  let T be RelStr;
+  mode type of T is Element of T;
+end;
+
+
+definition
+let T be RelStr;
+mode type of T is Element of T;
+end;
+
+
+::
+
+theorem
+for x being object holds x is set;
