@@ -9,21 +9,21 @@ sys.path.append(parent_dir)
 TEST_DIR = f"{os.getcwd()}/tests"
 
 miz_controller = MizController()
-miz_controller.exec_file("data/jgraph_4.miz", "data/mml.vct")
+miz_controller.exec_file(f"{TEST_DIR}/data/jgraph_4.miz", f"{TEST_DIR}/data/mml.vct")
 
 miz_controller2 = MizController()
-miz_controller2.exec_file("data/tarski_0.miz", "data/mml.vct")
+miz_controller2.exec_file(f"{TEST_DIR}/data/tarski_0.miz", f"{TEST_DIR}/data/mml.vct")
 
 load_settings()
 token_table = miz_controller.token_table
 token_table2 = miz_controller2.token_table
 
 abcmiz_0_miz_controller = MizController()
-abcmiz_0_miz_controller.exec_file("data/abcmiz_0.miz", "data/mml.vct")
+abcmiz_0_miz_controller.exec_file(f"{TEST_DIR}/data/abcmiz_0.miz", f"{TEST_DIR}/data/mml.vct")
 token_table3 = abcmiz_0_miz_controller.token_table
 
 algstr_4_miz_controller = MizController()
-algstr_4_miz_controller.exec_file("data/algstr_4.miz", "data/mml.vct")
+algstr_4_miz_controller.exec_file(f"{TEST_DIR}/data/algstr_4.miz", f"{TEST_DIR}/data/mml.vct")
 algstr_4_token_table = algstr_4_miz_controller.token_table
 
 
