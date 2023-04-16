@@ -167,5 +167,141 @@ def space_adjusted_lines(tokens_by_line):
     return output_lines
 
 
+def token_texts(tokens):
+    if tokens == []:
+        return []
+    return [token.text for token in tokens]
+
+
+def determine_indentation_numbers(tokens_by_line):
+    # 環境部と本体部で分けて処理する
+    environ_part_tokens, body_part_tokens = split_into_environ_and_body_part(tokens_by_line)
+    return determine_environ_part_indentation_numbers(
+        environ_part_tokens
+    ) + determine_body_part_indentation_numbers(body_part_tokens)
+
+
+def determine_environ_part_indentation_numbers(environ_part_tokens):
+    indentation_numbers = []
+
+    for tokens in environ_part_tokens:
+        if tokens == []:
+            indentation_numbers.append(0)
+            continue
+
+        first_token = tokens[0]
+        first_token_text = first_token.text
+
+        if first_token_text in option.ENVIRON_TAGS:
+            indentation_numbers.append(option.ENVIRON_TOP_INDENTATION_SPACE_NUMBER)
+        elif first_token.token_type == TokenType.IDENTIFIER:
+            indentation_numbers.append(option.ENVIRON_IN_LINE_INDENTATION_SPACE_NUMBER)
+        else:
+            indentation_numbers.append(0)
+
+    return indentation_numbers
+
+
+def determine_body_part_indentation_numbers(body_part_tokens):
+    indentation_numbers = []
+    current_indentation_step = 0
+    current_block_level = 0
+    # Theorem, Scheme ブロック内でのみ利用
+    current_block = ""
+    proof_found = False
+
+    for tokens in body_part_tokens:
+        if tokens == []:
+            indentation_numbers.append(0)
+            continue
+
+        first_token_text = tokens[0].text
+
+        # インデント数の決定と、インデント段階の変更
+        if first_token_text in option.USE_INDENT_TAGS:
+            if current_block == "theorem":
+                if first_token_text == "proof":
+                    if not proof_found:
+                        current_indentation_step -= 1
+                        proof_found = True
+                    current_block_level += 1
+                    indentation_numbers.append(
+                        current_indentation_step * option.SPACE_NUMBER_PER_INDENTATION
+                    )
+                    current_indentation_step += 1
+            elif current_block == "scheme":
+                if first_token_text == "proof":
+                    if not proof_found:
+                        current_indentation_step -= 1
+                        proof_found = True
+                    else:
+                        current_block_level += 1
+                    indentation_numbers.append(
+                        current_indentation_step * option.SPACE_NUMBER_PER_INDENTATION
+                    )
+                    current_indentation_step += 1
+                if first_token_text == "provided":
+                    current_indentation_step -= 1
+                    indentation_numbers.append(
+                        current_indentation_step * option.SPACE_NUMBER_PER_INDENTATION
+                    )
+                    current_indentation_step += 1
+            else:
+                indentation_numbers.append(
+                    current_indentation_step * option.SPACE_NUMBER_PER_INDENTATION
+                )
+                current_indentation_step += 1
+        elif first_token_text == "end":
+            current_block_level -= 1
+            current_indentation_step -= 1
+            indentation_numbers.append(
+                current_indentation_step * option.SPACE_NUMBER_PER_INDENTATION
+            )
+        else:
+            indentation_numbers.append(
+                current_indentation_step * option.SPACE_NUMBER_PER_INDENTATION
+            )
+
+        # "theorem" タグは "end" と対にならないため、ブロック内にいるどうか判定が必要
+        # Theorem ブロック終了条件
+        #   - Proof の場合                : Proof ブロックが終了する
+        #   - Simple-Justification の場合 : ";" が出現する
+        if first_token_text == "theorem":
+            current_block = "theorem"
+            proof_found = False
+            current_block_level = 1
+        elif current_block == "theorem":
+            if (first_token_text == "end" and current_block_level == 1) or (
+                not proof_found and ";" in token_texts(tokens)
+            ):
+                current_block = ""
+                current_block_level = 0
+
+        # Schemeブロック内で最初に出現する "proof" は "end" と対にならないため、ブロック内にいるどうか判定が必要
+        if first_token_text == "scheme":
+            current_block = "scheme"
+            proof_found = False
+            current_block_level = 1
+        elif current_block == "scheme":
+            if first_token_text == "end" and current_block_level == 0:
+                current_block = ""
+                current_block_level = 0
+
+    return indentation_numbers
+
+
+def split_into_environ_and_body_part(tokens_by_line):
+    for current_line_number, tokens in enumerate(tokens_by_line):
+        if tokens == []:
+            continue
+
+        init_token = tokens[0]
+        if (
+            init_token.token_type == TokenType.KEYWORD
+            and init_token.keyword_type == KeywordType.BEGIN_
+        ):
+            return tokens_by_line[:current_line_number], tokens_by_line[current_line_number:]
+
+
 if __name__ == "__main__":
     main(sys.argv)

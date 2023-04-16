@@ -1,6 +1,8 @@
 {
   "MAX_LINE_LENGTH": 80,
-  "INDENT_SIZE": 2,
+  "SPACE_NUMBER_PER_INDENTATION": 2,
+  "ENVIRON_TOP_INDENTATION_SPACE_NUMBER": 1,
+  "ENVIRON_IN_LINE_INDENTATION_SPACE_NUMBER": 6,
   "ALONE_KEYWORDS": [
     "definition",
     "registration",
@@ -21,6 +23,31 @@
     "consistency",
     "reducibility",
     "end"
+  ],
+  "ENVIRON_TAGS": [
+    "vocabularies",
+    "notations",
+    "constructors",
+    "registrations",
+    "definitions",
+    "expansions",
+    "equalities",
+    "theorems",
+    "schemes",
+    "requirements"
+  ],
+  "USE_INDENT_TAGS": [
+    "definition",
+    "registration",
+    "notation",
+    "theorem",
+    "scheme",
+    "case",
+    "suppose",
+    "hereby",
+    "now",
+    "proof",
+    "provided"
   ],
   "TOP_OF_BLOCK_TAGS": [
     "begin",
