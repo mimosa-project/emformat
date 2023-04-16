@@ -136,8 +136,8 @@ def test_find_first_no_empty_array_i():
     assert(find_first_no_empty_array_i(array)) == 3
 
 
-def test_adjust_blank_line():
+def test_determine_blank_line():
     with open(f"{TEST_DIR}/expected/blank_line.miz") as f:
         expected = f.read().split("\n")
-    result = space_adjusted_lines(adjust_blank_line(tokens_by_line(blank_line_token_table)))
+    result = space_adjusted_lines(determine_blank_line(tokens_by_line(blank_line_token_table)))
     assert result == expected

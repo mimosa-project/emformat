@@ -167,7 +167,7 @@ def space_adjusted_lines(tokens_by_line):
     return output_lines
 
 
-def adjust_blank_line(tokens_by_line):
+def determine_blank_line(tokens_by_line):
     output_tokens_by_line = []
 
     # 空行の挿入
