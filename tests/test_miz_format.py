@@ -18,7 +18,13 @@ load_settings()
 token_table = miz_controller.token_table
 token_table2 = miz_controller2.token_table
 
+abcmiz_0_miz_controller = MizController()
+abcmiz_0_miz_controller.exec_file("data/abcmiz_0.miz", "data/mml.vct")
+token_table3 = abcmiz_0_miz_controller.token_table
 
+algstr_4_miz_controller = MizController()
+algstr_4_miz_controller.exec_file("data/algstr_4.miz", "data/mml.vct")
+algstr_4_token_table = algstr_4_miz_controller.token_table
 
 
 def test_cut_center_space_format_is_valid1():
@@ -111,3 +117,112 @@ def test_space_adjusted_line7():
 #     assert (
 #         space_adjusted_line(tokens_by_line(token_table2)[47])
 #     ) == "scheme Replacement {A() -> set, P[object, object]}:"
+
+
+def test_split_into_environ_and_body_part():
+    input_lines = tokens_by_line(token_table)
+    assert (len(split_into_environ_and_body_part(input_lines)[0])) == 42
+
+
+def test_token_texts():
+    tokens = tokens_by_line(token_table)[44]
+    assert (token_texts(tokens)) == ["reserve", "a", "for", "Real", ";"]
+
+
+def test_determine_environ_part_indentation_numbers():
+    assert (determine_environ_part_indentation_numbers(tokens_by_line(token_table)[10:25])) == [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        1,
+        6,
+        6,
+        6,
+        1,
+        6,
+        6,
+        6,
+        6,
+    ]
+
+
+# Theoremブロック(Proof) を含む場合
+def test_determine_body_part_indentation_numbers1():
+    assert (determine_body_part_indentation_numbers(tokens_by_line(token_table3)[226:249])) == [
+        0,
+        2,
+        2,
+        0,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        2,
+        2,
+        2,
+        0,
+    ]
+
+
+# Theoremブロック(Simple-Justification)を含む場合
+def test_determine_body_part_indentation_numbers2():
+    assert (determine_body_part_indentation_numbers(tokens_by_line(token_table2)[30:35])) == [
+        0,
+        2,
+        2,
+        2,
+        0,
+    ]
+
+
+# Schemeブロックを含む場合
+def test_determine_body_part_indentation_numbers3():
+    assert (determine_body_part_indentation_numbers(tokens_by_line(algstr_4_token_table)[135:161])) == [
+        0,
+        2,
+        2,
+        2,
+        0,
+        2,
+        2,
+        0,
+        2,
+        2,
+        2,
+        2,
+        2,
+        4,
+        4,
+        4,
+        2,
+        2,
+        2,
+        4,
+        4,
+        4,
+        2,
+        2,
+        2,
+        0,
+    ]
+
+
+# def test_determine_indentation_numbers():
+#     assert (
+#         determine_indentation_numbers(tokens_by_line(token_table)[10:25])
+#         + tokens_by_line(token_table)[390:405]
+#     ) == []
