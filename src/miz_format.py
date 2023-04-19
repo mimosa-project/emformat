@@ -173,7 +173,7 @@ def token_texts(tokens):
     return [token.text for token in tokens]
 
 
-def determine_indentation_numbers(tokens_by_line):
+def determine_indentation_numbers(tokens_by_line) -> list[int]:
     # 環境部と本体部で分けて処理する
     environ_part_tokens, body_part_tokens = split_into_environ_and_body_part(tokens_by_line)
     return determine_environ_part_indentation_numbers(
