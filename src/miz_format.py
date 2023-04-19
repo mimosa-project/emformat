@@ -175,16 +175,18 @@ def token_texts(tokens):
 
 def determine_indentation_numbers(tokens_by_line) -> list[int]:
     # 環境部と本体部で分けて処理する
-    environ_part_tokens, body_part_tokens = split_into_environ_and_body_part(tokens_by_line)
+    environ_part_tokens_by_line, body_part_tokens_by_line = split_into_environ_and_body_part(
+        tokens_by_line
+    )
     return determine_environ_part_indentation_numbers(
-        environ_part_tokens
-    ) + determine_body_part_indentation_numbers(body_part_tokens)
+        environ_part_tokens_by_line
+    ) + determine_body_part_indentation_numbers(body_part_tokens_by_line)
 
 
-def determine_environ_part_indentation_numbers(environ_part_tokens):
+def determine_environ_part_indentation_numbers(environ_part_tokens_by_line):
     indentation_numbers = []
 
-    for tokens in environ_part_tokens:
+    for tokens in environ_part_tokens_by_line:
         if tokens == []:
             indentation_numbers.append(0)
             continue
@@ -202,15 +204,15 @@ def determine_environ_part_indentation_numbers(environ_part_tokens):
     return indentation_numbers
 
 
-def determine_body_part_indentation_numbers(body_part_tokens):
+def determine_body_part_indentation_numbers(body_part_tokens_by_line):
     indentation_numbers = []
     current_indentation_step = 0
     current_block_level = 0
     # Theorem, Scheme ブロック内でのみ利用
-    current_block = ""
+    current_block_type = ""
     proof_found = False
 
-    for tokens in body_part_tokens:
+    for tokens in body_part_tokens_by_line:
         if tokens == []:
             indentation_numbers.append(0)
             continue
@@ -219,7 +221,7 @@ def determine_body_part_indentation_numbers(body_part_tokens):
 
         # インデント数の決定と、インデント段階の変更
         if first_token_text in option.USE_INDENT_TAGS:
-            if current_block == "theorem":
+            if current_block_type == "theorem":
                 if first_token_text == "proof":
                     if not proof_found:
                         current_indentation_step -= 1
@@ -229,7 +231,7 @@ def determine_body_part_indentation_numbers(body_part_tokens):
                         current_indentation_step * option.SPACE_NUMBER_PER_INDENTATION
                     )
                     current_indentation_step += 1
-            elif current_block == "scheme":
+            elif current_block_type == "scheme":
                 if first_token_text == "proof":
                     if not proof_found:
                         current_indentation_step -= 1
@@ -267,24 +269,24 @@ def determine_body_part_indentation_numbers(body_part_tokens):
         #   - Proof の場合                : Proof ブロックが終了する
         #   - Simple-Justification の場合 : ";" が出現する
         if first_token_text == "theorem":
-            current_block = "theorem"
+            current_block_type = "theorem"
             proof_found = False
             current_block_level = 1
-        elif current_block == "theorem":
+        elif current_block_type == "theorem":
             if (first_token_text == "end" and current_block_level == 1) or (
                 not proof_found and ";" in token_texts(tokens)
             ):
-                current_block = ""
+                current_block_type = ""
                 current_block_level = 0
 
         # Schemeブロック内で最初に出現する "proof" は "end" と対にならないため、ブロック内にいるどうか判定が必要
         if first_token_text == "scheme":
-            current_block = "scheme"
+            current_block_type = "scheme"
             proof_found = False
             current_block_level = 1
-        elif current_block == "scheme":
+        elif current_block_type == "scheme":
             if first_token_text == "end" and current_block_level == 0:
-                current_block = ""
+                current_block_type = ""
                 current_block_level = 0
 
     return indentation_numbers
