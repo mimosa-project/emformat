@@ -115,29 +115,29 @@ def test_space_adjusted_line7():
 #     ) == "scheme Replacement {A() -> set, P[object, object]}:"
 
 
-def test_omit_continuous_values():
+def test_remove_consecutive_value():
     array = ["aaa", "aaa", "bbb", "ccc", "ccc"]
-    assert (omit_continuous_values(array, "aaa")) == ["aaa", "bbb", "ccc", "ccc"]
+    assert (remove_consecutive_value(array, "aaa")) == ["aaa", "bbb", "ccc", "ccc"]
 
 
-def test_count_before_comment_line_number1():
-    assert (count_before_comment_line_number(tokens_by_line(token_table2), 13)) == 13
+def test_count_comment_lines_before1():
+    assert (count_comment_lines_before(tokens_by_line(token_table2), 13)) == 13
 
 
-def test_count_before_comment_line_number2():
-    assert (count_before_comment_line_number(tokens_by_line(token_table2), 14)) == 0
+def test_count_comment_lines_before2():
+    assert (count_comment_lines_before(tokens_by_line(token_table2), 14)) == 0
 
 
-def test_count_before_comment_line_number3():
-    assert (count_before_comment_line_number(tokens_by_line(token_table2), 22)) == 1
+def test_count_comment_lines_before3():
+    assert (count_comment_lines_before(tokens_by_line(token_table2), 22)) == 1
 
 def test_find_first_no_empty_array_i():
     array = [[], [], [], [1]]
     assert(find_first_no_empty_array_i(array)) == 3
 
 
-def test_determine_blank_line():
+def test_normalize_blank_line():
     with open(f"{TEST_DIR}/expected/blank_line.miz") as f:
         expected = f.read().split("\n")
-    result = space_adjusted_lines(determine_blank_line(tokens_by_line(blank_line_token_table)))
+    result = space_adjusted_lines(normalize_blank_line(tokens_by_line(blank_line_token_table)))
     assert result == expected

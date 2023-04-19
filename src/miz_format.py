@@ -167,7 +167,7 @@ def space_adjusted_lines(tokens_by_line):
     return output_lines
 
 
-def determine_blank_line(tokens_by_line):
+def normalize_blank_line(tokens_by_line):
     output_tokens_by_line = []
 
     # 空行の挿入
@@ -177,27 +177,27 @@ def determine_blank_line(tokens_by_line):
             continue
 
         first_token_text = tokens[0].text
-        before_comment_line_number = count_before_comment_line_number(tokens_by_line, current_line)
-        add_blank_line_i = (
+        before_comment_line_number = count_comment_lines_before(tokens_by_line, current_line)
+        add_blank_line_number = (
             -1 * before_comment_line_number
             if before_comment_line_number
             else len(output_tokens_by_line)
         )
         if first_token_text in option.USE_BEFORE_BLANK_LINE:
-            output_tokens_by_line.insert(add_blank_line_i, [])
+            output_tokens_by_line.insert(add_blank_line_number, [])
             output_tokens_by_line.append(tokens)
         elif first_token_text in option.USE_BEFORE_AND_AFTER_BLANK_LINE:
-            output_tokens_by_line.insert(add_blank_line_i, [])
+            output_tokens_by_line.insert(add_blank_line_number, [])
             output_tokens_by_line.extend([tokens, []])
         else:
             output_tokens_by_line.append(tokens)
 
     first_no_empty_array_i = find_first_no_empty_array_i(output_tokens_by_line)
 
-    return omit_continuous_values(output_tokens_by_line[first_no_empty_array_i:], [])
+    return remove_consecutive_value(output_tokens_by_line[first_no_empty_array_i:], value=[])
 
 
-def count_before_comment_line_number(tokens_by_line, target_line):
+def count_comment_lines_before(tokens_by_line, target_line):
     comment_line_number = 0
     for line in reversed(range(target_line)):
         if tokens_by_line[line] == []:
@@ -212,9 +212,9 @@ def count_before_comment_line_number(tokens_by_line, target_line):
     return comment_line_number
 
 
-def omit_continuous_values(array, target):
+def remove_consecutive_value(array, value):
     output = [array[0]]
-    output.extend([j for i, j in zip(array, array[1:]) if j != target or i != j])
+    output.extend([j for i, j in zip(array, array[1:]) if j != value or i != j])
     return output
 
 
