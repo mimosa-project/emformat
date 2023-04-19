@@ -185,12 +185,9 @@ def normalize_blank_line(tokens_by_line):
         )
         if first_token_text in option.USE_BEFORE_BLANK_LINE:
             output_tokens_by_line.insert(add_blank_line_number, [])
-            output_tokens_by_line.append(tokens)
-        elif first_token_text in option.USE_BEFORE_AND_AFTER_BLANK_LINE:
-            output_tokens_by_line.insert(add_blank_line_number, [])
-            output_tokens_by_line.extend([tokens, []])
-        else:
-            output_tokens_by_line.append(tokens)
+        output_tokens_by_line.append(tokens)
+        if first_token_text in option.USE_AFTER_BLANK_LINE:
+            output_tokens_by_line.append([])
 
     first_no_empty_array_i = find_first_no_empty_array_i(output_tokens_by_line)
 

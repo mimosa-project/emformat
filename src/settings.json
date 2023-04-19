@@ -27,10 +27,11 @@
     "registration",
     "notation",
     "theorem",
-    "scheme"
+    "scheme",
+    "begin",
+    "environ"
   ],
-
-  "USE_BEFORE_AND_AFTER_BLANK_LINE": [
+  "USE_AFTER_BLANK_LINE": [
     "begin",
     "environ"
   ],
