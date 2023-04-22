@@ -253,10 +253,7 @@ def determine_body_part_indentation_numbers(body_part_tokens_by_line):
                 current_indentation_step * option.SPACE_NUMBER_PER_INDENTATION
             )
 
-        # "theorem" タグは "end" と対にならないため、ブロック内にいるどうか判定が必要
-        # Theorem ブロック終了条件
-        #   - Proof の場合                : Proof ブロックが終了する
-        #   - Simple-Justification の場合 : ";" が出現する
+        # Theoremブロックの開始/終了判定
         if first_token_text == "theorem":
             current_block_type = "theorem"
             proof_found = False
@@ -268,7 +265,7 @@ def determine_body_part_indentation_numbers(body_part_tokens_by_line):
                 current_block_type = ""
                 current_block_level = 0
 
-        # Schemeブロック内で最初に出現する "proof" は "end" と対にならないため、ブロック内にいるどうか判定が必要
+        # Schemeブロックの開始/終了判定
         if first_token_text == "scheme":
             current_block_type = "scheme"
             proof_found = False
