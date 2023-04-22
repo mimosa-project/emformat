@@ -1,20 +1,11 @@
 import sys
 import os
 import json
-import re
 import utils.option as option
 
 from py_miz_controller import (
     MizController,
-    ASTToken,
     TokenType,
-    ElementType,
-    StatementType,
-    BlockType,
-    SymbolType,
-    SpecialSymbolType,
-    IdentifierType,
-    CommentType,
     KeywordType,
 )
 
