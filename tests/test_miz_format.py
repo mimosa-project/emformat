@@ -1,3 +1,5 @@
+# flake8: noqa
+
 import os
 import pytest
 from src.miz_format import *
@@ -25,6 +27,10 @@ token_table3 = abcmiz_0_miz_controller.token_table
 algstr_4_miz_controller = MizController()
 algstr_4_miz_controller.exec_file(f"{TEST_DIR}/data/algstr_4.miz", f"{TEST_DIR}/data/mml.vct")
 algstr_4_token_table = algstr_4_miz_controller.token_table
+
+algspec1_miz_controller = MizController()
+algspec1_miz_controller.exec_file(f"{TEST_DIR}/data/algspec1.miz", f"{TEST_DIR}/data/mml.vct")
+algspec1_token_table = algspec1_miz_controller.token_table
 
 
 def test_cut_center_space_format_is_valid1():
@@ -151,7 +157,9 @@ def test_determine_environ_part_indentation_numbers():
 
 # Theoremブロック(Proof) を含む場合
 def test_determine_body_part_indentation_numbers1():
-    assert (determine_body_part_indentation_numbers(tokens_by_line(token_table3)[226:249])) == [
+    assert (
+        determine_body_part_indentation_numbers(tokens_by_line(algspec1_token_table)[75:111])
+    ) == [
         0,
         2,
         2,
@@ -162,6 +170,18 @@ def test_determine_body_part_indentation_numbers1():
         2,
         2,
         2,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        4,
+        2,
         2,
         4,
         4,
@@ -171,7 +191,8 @@ def test_determine_body_part_indentation_numbers1():
         4,
         4,
         4,
-        2,
+        4,
+        4,
         2,
         2,
         0,
@@ -191,7 +212,9 @@ def test_determine_body_part_indentation_numbers2():
 
 # Schemeブロックを含む場合
 def test_determine_body_part_indentation_numbers3():
-    assert (determine_body_part_indentation_numbers(tokens_by_line(algstr_4_token_table)[135:161])) == [
+    assert (
+        determine_body_part_indentation_numbers(tokens_by_line(algstr_4_token_table)[135:161])
+    ) == [
         0,
         2,
         2,

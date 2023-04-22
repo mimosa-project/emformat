@@ -221,38 +221,36 @@ def determine_body_part_indentation_numbers(body_part_tokens_by_line):
 
         # インデント数の決定と、インデント段階の変更
         if first_token_text in option.USE_INDENT_TAGS:
-            if current_block_type == "theorem":
-                if first_token_text == "proof":
-                    if not proof_found:
-                        current_indentation_step -= 1
-                        proof_found = True
-                    current_block_level += 1
-                    indentation_numbers.append(
-                        current_indentation_step * option.SPACE_NUMBER_PER_INDENTATION
-                    )
-                    current_indentation_step += 1
-            elif current_block_type == "scheme":
-                if first_token_text == "proof":
-                    if not proof_found:
-                        current_indentation_step -= 1
-                        proof_found = True
-                    else:
-                        current_block_level += 1
-                    indentation_numbers.append(
-                        current_indentation_step * option.SPACE_NUMBER_PER_INDENTATION
-                    )
-                    current_indentation_step += 1
-                if first_token_text == "provided":
+            if current_block_type == "theorem" and first_token_text == "proof":
+                if not proof_found:
                     current_indentation_step -= 1
-                    indentation_numbers.append(
-                        current_indentation_step * option.SPACE_NUMBER_PER_INDENTATION
-                    )
-                    current_indentation_step += 1
+                    proof_found = True
+                current_block_level += 1
+                indentation_numbers.append(
+                    current_indentation_step * option.SPACE_NUMBER_PER_INDENTATION
+                )
+                current_indentation_step += 1
+            elif current_block_type == "scheme" and first_token_text == "proof":
+                if not proof_found:
+                    current_indentation_step -= 1
+                    proof_found = True
+                else:
+                    current_block_level += 1
+                indentation_numbers.append(
+                    current_indentation_step * option.SPACE_NUMBER_PER_INDENTATION
+                )
+                current_indentation_step += 1
             else:
                 indentation_numbers.append(
                     current_indentation_step * option.SPACE_NUMBER_PER_INDENTATION
                 )
                 current_indentation_step += 1
+        elif first_token_text == "provided":
+            current_indentation_step -= 1
+            indentation_numbers.append(
+                current_indentation_step * option.SPACE_NUMBER_PER_INDENTATION
+            )
+            current_indentation_step += 1
         elif first_token_text == "end":
             current_block_level -= 1
             current_indentation_step -= 1
