@@ -2,6 +2,7 @@ import sys
 import os
 import json
 import utils.option as option
+import logging
 
 from py_miz_controller import (
     MizController,
@@ -212,16 +213,24 @@ def determine_body_part_indentation_numbers(body_part_tokens_by_line):
 
         first_token_text = tokens[0].text
 
+        # ブロックの開始/終了の整合性をチェックする
+        if first_token_text in option.TOP_OF_BLOCK_TAGS and current_block_level > 0:
+            logging.error("Expected 'end'")
+            sys.exit(1)
+        elif first_token_text == "end" and current_block_level == 0:
+            logging.error("There are 'end' without a corresponding keyword")
+            sys.exit(1)
+
         # インデント数の決定と、インデント段階の変更
         if first_token_text in option.USE_INDENT_TAGS:
             if current_block_type == "theorem" and first_token_text == "proof":
                 if not proof_found:
                     current_indentation_step -= 1
                     proof_found = True
-                current_block_level += 1
                 indentation_numbers.append(
                     current_indentation_step * option.SPACE_NUMBER_PER_INDENTATION
                 )
+                current_block_level += 1
                 current_indentation_step += 1
             elif current_block_type == "scheme" and first_token_text == "proof":
                 if not proof_found:
@@ -237,6 +246,7 @@ def determine_body_part_indentation_numbers(body_part_tokens_by_line):
                 indentation_numbers.append(
                     current_indentation_step * option.SPACE_NUMBER_PER_INDENTATION
                 )
+                current_block_level += 1
                 current_indentation_step += 1
         elif first_token_text == "provided":
             current_indentation_step -= 1

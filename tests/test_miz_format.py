@@ -244,8 +244,19 @@ def test_determine_body_part_indentation_numbers3():
     ]
 
 
-# def test_determine_indentation_numbers():
-#     assert (
-#         determine_indentation_numbers(tokens_by_line(token_table)[10:25])
-#         + tokens_by_line(token_table)[390:405]
-#     ) == []
+def test_determine_body_part_indentation_numbers4(caplog):
+    input = tokens_by_line(token_table)[48:58]
+    input.pop(4)
+    try:
+        determine_body_part_indentation_numbers(input)
+    except SystemExit as e:
+        assert e.code == 1
+        assert "Expected 'end'" in caplog.text
+
+
+def test_determine_body_part_indentation_numbers5(caplog):
+    try:
+        determine_body_part_indentation_numbers(tokens_by_line(token_table)[50:54])
+    except SystemExit as e:
+        assert e.code == 1
+        assert "There are 'end' without a corresponding keyword" in caplog.text
