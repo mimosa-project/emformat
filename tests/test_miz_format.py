@@ -9,16 +9,18 @@ sys.path.append(parent_dir)
 TEST_DIR = f"{os.getcwd()}/tests"
 
 miz_controller = MizController()
-miz_controller.exec_file("data/jgraph_4.miz", "data/mml.vct")
+miz_controller.exec_file(f"{TEST_DIR}/data/jgraph_4.miz", f"{TEST_DIR}/data/mml.vct")
 
 miz_controller2 = MizController()
-miz_controller2.exec_file("data/tarski_0.miz", "data/mml.vct")
+miz_controller2.exec_file(f"{TEST_DIR}/data/tarski_0.miz", "f{TEST_DIR}/data/mml.vct")
+
+blank_line_miz_controller = MizController()
+blank_line_miz_controller.exec_file(f"{TEST_DIR}/data/blank_line.miz", "f{TEST_DIR}/data/mml.vct")
+blank_line_token_table = blank_line_miz_controller.token_table
 
 load_settings()
 token_table = miz_controller.token_table
 token_table2 = miz_controller2.token_table
-
-
 
 
 def test_cut_center_space_format_is_valid1():
@@ -111,3 +113,31 @@ def test_space_adjusted_line7():
 #     assert (
 #         space_adjusted_line(tokens_by_line(token_table2)[47])
 #     ) == "scheme Replacement {A() -> set, P[object, object]}:"
+
+
+def test_remove_consecutive_value():
+    array = ["aaa", "aaa", "bbb", "ccc", "ccc"]
+    assert (remove_consecutive_value(array, "aaa")) == ["aaa", "bbb", "ccc", "ccc"]
+
+
+def test_count_comment_lines_before1():
+    assert (count_comment_lines_before(tokens_by_line(token_table2), 13)) == 13
+
+
+def test_count_comment_lines_before2():
+    assert (count_comment_lines_before(tokens_by_line(token_table2), 14)) == 0
+
+
+def test_count_comment_lines_before3():
+    assert (count_comment_lines_before(tokens_by_line(token_table2), 22)) == 1
+
+def test_find_first_no_empty_array_i():
+    array = [[], [], [], [1]]
+    assert(find_first_no_empty_array_i(array)) == 3
+
+
+def test_normalize_blank_line():
+    with open(f"{TEST_DIR}/expected/blank_line.miz") as f:
+        expected = f.read().split("\n")
+    result = space_adjusted_lines(normalize_blank_line(tokens_by_line(blank_line_token_table)))
+    assert result == expected
