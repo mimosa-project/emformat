@@ -3,6 +3,8 @@ import os
 import json
 import utils.option as option
 import logging
+import itertools
+
 
 from py_miz_controller import (
     MizController,
@@ -165,35 +167,131 @@ def token_texts(tokens):
     return [token.text for token in tokens]
 
 
+def convert_tokens_by_line_to_token_texts(tokens_by_line):
+    texts = []
+    for tokens in tokens_by_line:
+        texts.append(token_texts(tokens))
+
+    return texts
+
+
 def determine_indentation_numbers(tokens_by_line) -> list[int]:
     # 環境部と本体部で分けて処理する
     environ_part_tokens_by_line, body_part_tokens_by_line = split_into_environ_and_body_part(
         tokens_by_line
     )
-    return determine_environ_part_indentation_numbers(
-        environ_part_tokens_by_line
-    ) + determine_body_part_indentation_numbers(body_part_tokens_by_line)
+
+    (
+        environ_part_indentation_numbers,
+        environ_part_tokens_by_line,
+    ) = determine_environ_part_line_breaks_and_indentation_numbers(environ_part_tokens_by_line)
+
+    body_part_indentation_numbers = determine_body_part_indentation_numbers(
+        body_part_tokens_by_line
+    )
+
+    output_tokens_by_line = environ_part_tokens_by_line + body_part_tokens_by_line
+    indentation_numbers = environ_part_indentation_numbers + body_part_indentation_numbers
+
+    return indentation_numbers, output_tokens_by_line
 
 
-def determine_environ_part_indentation_numbers(environ_part_tokens_by_line):
-    indentation_numbers = []
+def determine_environ_part_line_breaks_and_indentation_numbers(environ_part_tokens_by_line):
+    tokens = list(itertools.chain.from_iterable(environ_part_tokens_by_line))
+    tokens_by_sentence = split_environ_part_tokens_into_sentences(tokens)
+    output_indentation_numbers = []
+    output_tokens_by_line = []
 
-    for tokens in environ_part_tokens_by_line:
-        if tokens == []:
-            indentation_numbers.append(0)
+    for tokens in tokens_by_sentence:
+        if len(tokens) == 0:
+            output_indentation_numbers.append(0)
+            output_tokens_by_line.append([])
+            continue
+        # 目標となるキーワードは必ず行頭に出現することを前提としている
+        elif tokens[0].text == "environ" or tokens[0].token_type == TokenType.COMMENT:
+            output_indentation_numbers.append(0)
+            output_tokens_by_line.append([tokens[0]])
             continue
 
-        first_token = tokens[0]
-        first_token_text = first_token.text
+        (
+            tokens_by_line,
+            indentation_numbers,
+        ) = determine_directive_line_breaks_and_indentation_numbers(tokens)
+        output_tokens_by_line.extend(tokens_by_line)
+        output_indentation_numbers.extend(indentation_numbers)
 
-        if first_token_text in option.ENVIRON_TAGS:
-            indentation_numbers.append(option.ENVIRON_TOP_INDENTATION_SPACE_NUMBER)
-        elif first_token.token_type == TokenType.IDENTIFIER:
-            indentation_numbers.append(option.ENVIRON_IN_LINE_INDENTATION_SPACE_NUMBER)
+    output_tokens_by_line.append([])
+    output_indentation_numbers.append(0)
+    return output_tokens_by_line, output_indentation_numbers
+
+
+# Input: 1行分のDirectiveのトークン列
+# Output: 最大文字数を超えないよう分割した行単位のトークン列、各行のインデント数の配列
+def determine_directive_line_breaks_and_indentation_numbers(
+    directive_tokens,
+) -> tuple[list[list], list]:
+    tokens_by_line = []
+    indentation_numbers = []
+    current_line_length = option.ENVIRON_TOP_INDENTATION_SPACE_NUMBER
+    current_line_tokens = []
+    carryover_tokens = []
+    # 区切り位置を決定
+    for token in directive_tokens:
+        current_line_length += len(token.text)
+
+        if current_line_length > option.MAX_LINE_LENGTH:
+            # 次の行が[,|;]から開始しないようにする
+            if token.text in [",", ";"]:
+                carryover_tokens.append(current_line_tokens.pop())
+            carryover_tokens.append(token)
+
+            # 現在の行を確定
+            tokens_by_line.append(current_line_tokens)
+
+            # 初期化
+            current_line_length = option.ENVIRON_IN_LINE_INDENTATION_SPACE_NUMBER + sum(
+                [len(token.text) for token in carryover_tokens]
+            )
+            current_line_tokens = carryover_tokens
+            carryover_tokens = []
         else:
-            indentation_numbers.append(0)
+            current_line_tokens.append(token)
 
-    return indentation_numbers
+        # トークン間のスペース数を加算
+        if token.text == "," or token.text in option.ENVIRON_TAGS:
+            current_line_length += 1
+
+    tokens_by_line.append(current_line_tokens)
+
+    # インデント数の決定
+    for i in range(len(tokens_by_line)):
+        if i == 0:
+            indentation_numbers.append(option.ENVIRON_TOP_INDENTATION_SPACE_NUMBER)
+        else:
+            indentation_numbers.append(option.ENVIRON_IN_LINE_INDENTATION_SPACE_NUMBER)
+
+    return tokens_by_line, indentation_numbers
+
+
+def split_environ_part_tokens_into_sentences(tokens) -> list[list]:
+    output_tokens_by_sentence = []
+    current_sentence_tokens = []
+
+    for token in tokens:
+        if token.text == "environ":
+            output_tokens_by_sentence.extend([[], [token], []])
+        elif token.token_type == TokenType.COMMENT:
+            output_tokens_by_sentence.append([token])
+        else:
+            current_sentence_tokens.append(token)
+            if token.text == ";":
+                output_tokens_by_sentence.append(current_sentence_tokens)
+                current_sentence_tokens = []
+
+    if output_tokens_by_sentence[0] == []:
+        output_tokens_by_sentence.pop(0)
+
+    return output_tokens_by_sentence
 
 
 def determine_body_part_indentation_numbers(body_part_tokens_by_line):

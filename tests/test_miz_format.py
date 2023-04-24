@@ -4,6 +4,8 @@ import os
 import pytest
 from src.miz_format import *
 import pathlib, sys
+import re
+import yaml
 
 parent_dir = str(pathlib.Path(__file__).parent.parent.parent)
 sys.path.append(parent_dir)
@@ -31,6 +33,12 @@ algstr_4_token_table = algstr_4_miz_controller.token_table
 algspec1_miz_controller = MizController()
 algspec1_miz_controller.exec_file(f"{TEST_DIR}/data/algspec1.miz", f"{TEST_DIR}/data/mml.vct")
 algspec1_token_table = algspec1_miz_controller.token_table
+
+environ_part_miz_controller = MizController()
+environ_part_miz_controller.exec_file(
+    f"{TEST_DIR}/data/environ_part.miz", f"{TEST_DIR}/data/mml.vct"
+)
+environ_part_token_table = environ_part_miz_controller.token_table
 
 
 def test_cut_center_space_format_is_valid1():
@@ -133,26 +141,6 @@ def test_split_into_environ_and_body_part():
 def test_token_texts():
     tokens = tokens_by_line(token_table)[44]
     assert (token_texts(tokens)) == ["reserve", "a", "for", "Real", ";"]
-
-
-def test_determine_environ_part_indentation_numbers():
-    assert (determine_environ_part_indentation_numbers(tokens_by_line(token_table)[10:25])) == [
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        1,
-        6,
-        6,
-        6,
-        1,
-        6,
-        6,
-        6,
-        6,
-    ]
 
 
 # Theoremブロック(Proof) を含む場合
@@ -260,3 +248,81 @@ def test_determine_body_part_indentation_numbers5(caplog):
     except SystemExit as e:
         assert e.code == 1
         assert "There are 'end' without a corresponding keyword" in caplog.text
+
+
+def test_split_environ_part_tokens_into_sentences():
+    tokens = list(itertools.chain.from_iterable(tokens_by_line(environ_part_token_table)))
+    result = convert_tokens_by_line_to_token_texts(split_environ_part_tokens_into_sentences(tokens))
+    expected = []
+    with open(f"{TEST_DIR}/expected/environ_part.yml") as f:
+        expected = yaml.safe_load(f)
+    assert (result) == expected
+
+
+def test_determine_directive_line_breaks_and_indentation_numbers():
+    tokens = list(itertools.chain.from_iterable(tokens_by_line(environ_part_token_table)[5:7]))
+    (
+        directive_tokens_by_line,
+        directive_indentation_numbers,
+    ) = determine_directive_line_breaks_and_indentation_numbers(tokens)
+
+    assert (directive_indentation_numbers) == [1, 6, 6]
+    assert ([token_texts(tokens) for tokens in directive_tokens_by_line]) == [
+        [
+            "vocabularies",
+            "NUMBERS",
+            ",",
+            "PRE_TOPC",
+            ",",
+            "FUNCT_4",
+            ",",
+            "SUPINF_2",
+            ",",
+            "COMPLEX1",
+            ",",
+            "XXREAL_0",
+            ",",
+        ],
+        [
+            "ORDINAL2",
+            ",",
+            "XBOOLE_0",
+            ",",
+            "FUNCT_1",
+            ",",
+            "TOPMETR",
+            ",",
+            "SUBSET_1",
+            ",",
+            "ORDINAL2",
+            ",",
+            "RCOMP_1",
+            ",",
+        ],
+        [
+            "RCOMP_2",
+            ";",
+        ],
+    ]
+
+
+def test_determine_environ_part_line_breaks_and_indentation_numbers1():
+    result = []
+    for tokens in determine_environ_part_line_breaks_and_indentation_numbers(
+        tokens_by_line(environ_part_token_table)
+    )[0]:
+        result.append([token.text for token in tokens])
+
+    expected = []
+    with open(f"{TEST_DIR}/expected/environ_part.txt") as f:
+        for line in f:
+            print(line)
+            expected.append(line.strip().split("|") if line != "\n" else [])
+
+    assert (result) == expected
+
+
+def test_determine_environ_part_line_breaks_and_indentation_numbers2():
+    assert (
+        determine_environ_part_line_breaks_and_indentation_numbers(tokens_by_line(environ_part_token_table))[1]
+    ) == [0, 0, 0, 0, 0, 1, 6, 6, 1, 6, 6, 1, 6, 0]
