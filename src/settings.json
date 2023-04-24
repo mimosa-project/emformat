@@ -49,12 +49,24 @@
     "proof"
   ],
   "TOP_OF_BLOCK_TAGS": [
-    "begin",
     "definition",
     "registration",
     "notation",
     "theorem",
     "scheme"
+  ],
+  "USE_BEFORE_BLANK_LINE": [
+    "definition",
+    "registration",
+    "notation",
+    "theorem",
+    "scheme",
+    "begin",
+    "environ"
+  ],
+  "USE_AFTER_BLANK_LINE": [
+    "begin",
+    "environ"
   ],
   "CUT_CENTER_SPACE": {
     ": __label": true,

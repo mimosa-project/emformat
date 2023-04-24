@@ -12,13 +12,19 @@ sys.path.append(parent_dir)
 
 TEST_DIR = f"{os.getcwd()}/tests"
 
+load_settings()
+
 miz_controller = MizController()
 miz_controller.exec_file(f"{TEST_DIR}/data/jgraph_4.miz", f"{TEST_DIR}/data/mml.vct")
 
 miz_controller2 = MizController()
 miz_controller2.exec_file(f"{TEST_DIR}/data/tarski_0.miz", f"{TEST_DIR}/data/mml.vct")
+miz_controller2.exec_file(f"{TEST_DIR}/data/tarski_0.miz", "f{TEST_DIR}/data/mml.vct")
 
-load_settings()
+blank_line_miz_controller = MizController()
+blank_line_miz_controller.exec_file(f"{TEST_DIR}/data/blank_line.miz", "f{TEST_DIR}/data/mml.vct")
+blank_line_token_table = blank_line_miz_controller.token_table
+
 token_table = miz_controller.token_table
 token_table2 = miz_controller2.token_table
 
@@ -324,5 +330,36 @@ def test_determine_environ_part_line_breaks_and_indentation_numbers1():
 
 def test_determine_environ_part_line_breaks_and_indentation_numbers2():
     assert (
-        determine_environ_part_line_breaks_and_indentation_numbers(tokens_by_line(environ_part_token_table))[1]
+        determine_environ_part_line_breaks_and_indentation_numbers(
+            tokens_by_line(environ_part_token_table)
+        )[1]
     ) == [0, 0, 0, 0, 0, 1, 6, 6, 1, 6, 6, 1, 6, 0]
+
+
+def test_remove_consecutive_value():
+    array = ["aaa", "aaa", "bbb", "ccc", "ccc"]
+    assert (remove_consecutive_value(array, "aaa")) == ["aaa", "bbb", "ccc", "ccc"]
+
+
+def test_count_comment_lines_before1():
+    assert (count_comment_lines_before(tokens_by_line(token_table2), 13)) == 13
+
+
+def test_count_comment_lines_before2():
+    assert (count_comment_lines_before(tokens_by_line(token_table2), 14)) == 0
+
+
+def test_count_comment_lines_before3():
+    assert (count_comment_lines_before(tokens_by_line(token_table2), 22)) == 1
+
+
+def test_find_first_no_empty_array_i():
+    array = [[], [], [], [1]]
+    assert (find_first_no_empty_array_i(array)) == 3
+
+
+def test_normalize_blank_line():
+    with open(f"{TEST_DIR}/expected/blank_line.miz") as f:
+        expected = f.read().split("\n")
+    result = space_adjusted_lines(normalize_blank_line(tokens_by_line(blank_line_token_table)))
+    assert result == expected
