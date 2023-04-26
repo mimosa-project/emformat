@@ -303,7 +303,7 @@ def determine_body_part_indentation_numbers(body_part_tokens_by_line):
     proof_found = False
 
     # インデントの決定の目標となるキーワードは、必ず行頭に出現することを前提としている
-    # adjust_line_break 内で実装
+    # adjust_newline_position で実装
     for tokens in body_part_tokens_by_line:
         if tokens == []:
             indentation_numbers.append(0)
@@ -388,9 +388,8 @@ def determine_body_part_indentation_numbers(body_part_tokens_by_line):
     return indentation_numbers
 
 
-# TODO: 改行を調整する処理
-# 適切に改行が挿入された状態での token_by_lines を返す
-def adjust_line_break(token_by_lines):
+# TODO: 特定のキーワードの前後で改行を挿入する
+def adjust_newline_position(token_by_lines):
     pass
 
 
