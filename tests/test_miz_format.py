@@ -322,7 +322,6 @@ def test_determine_environ_part_line_breaks_and_indentation_numbers1():
     expected = []
     with open(f"{TEST_DIR}/expected/environ_part.txt") as f:
         for line in f:
-            print(line)
             expected.append(line.strip().split("|") if line != "\n" else [])
 
     assert (result) == expected
