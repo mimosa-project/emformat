@@ -45,7 +45,7 @@ def load_settings():
 
 
 def format(input_lines, token_table, ast_root):
-    output(space_adjusted_lines(token_lines(token_table)))
+    output(generate_space_adjusted_lines(generate_token_lines(token_table)))
 
 
 def output(output_lines):
@@ -74,7 +74,7 @@ def convert_to_token_representative_name(token):
         return token.text
 
 
-def token_lines(token_table):
+def generate_token_lines(token_table):
     last_line_number = token_table.last_token.line_number
     token_lines = [[] for _ in range(last_line_number)]
 
@@ -143,7 +143,7 @@ def separable_tokens_list(tokens):
     return separable_tokens_list
 
 
-def space_adjusted_line(tokens):
+def generate_space_adjusted_line(tokens):
     output_line = ""
     no_space_tokens_list = determine_space_omission(tokens)
 
@@ -153,24 +153,24 @@ def space_adjusted_line(tokens):
     return output_line.lstrip()
 
 
-def space_adjusted_lines(token_lines):
+def generate_space_adjusted_lines(token_lines):
     output_lines = []
 
     for tokens in token_lines:
-        output_lines.append(space_adjusted_line(tokens))
+        output_lines.append(generate_space_adjusted_line(tokens))
     return output_lines
 
 
-def token_texts(tokens):
+def convert_tokens_to_texts(tokens):
     if tokens == []:
         return []
     return [token.text for token in tokens]
 
 
-def convert_token_lines_to_token_texts(token_lines):
+def convert_token_lines_to_texts(token_lines):
     texts = []
     for tokens in token_lines:
-        texts.append(token_texts(tokens))
+        texts.append(convert_tokens_to_texts(tokens))
 
     return texts
 
@@ -352,7 +352,7 @@ def determine_body_part_indentation_widths(body_part_token_lines):
             current_block_level = 1
         elif current_block_type == "theorem":
             if (first_token_text == "end" and current_block_level == 1) or (
-                is_top_level_proof and ";" in token_texts(tokens)
+                is_top_level_proof and ";" in convert_tokens_to_texts(tokens)
             ):
                 current_block_type = ""
                 current_block_level = 0
