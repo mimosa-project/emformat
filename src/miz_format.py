@@ -177,7 +177,23 @@ def format(token_table):
 
 
 def format_env_part(env_part_token_lines):
-    pass
+    # 元の改行位置は無視する
+    normalized_token_lines = normalize_blank_line(
+        split_env_part_token_lines_into_sentences(env_part_token_lines)
+    )
+
+    indentation_widths = determine_env_part_indentation_widths(normalized_token_lines)
+    space_adjusted_lines = generate_space_adjusted_lines(normalized_token_lines)
+
+    output_lines = []
+    for indentation_width, line in zip(indentation_widths, space_adjusted_lines):
+        line = f"{' ' * indentation_width}{line}"
+        # TODO: ここで split_lines_at_max_length を呼び出す
+        # if 開始文字 in ENV_DIRECTIVE_KEYWORDS:
+        # output_lines.extend(split_line_at_max_length(line, option.ENVIRON_LINE_INDENTATION_WIDTH))
+        # else
+        # output_lines.append(line)
+        output_lines.append(line)
 
 
 def format_body_part(body_part_token_lines):
@@ -190,7 +206,7 @@ def format_body_part(body_part_token_lines):
         line = f"{' ' * indentation_width}{line}"
         # TODO: ここで split_lines_at_max_length を呼び出す
         # output_lines.extend(split_line_at_max_length(line, indentation_width))
-        output_lines.extend(line)
+        output_lines.append(line)
 
 
 # TODO: 各行が最大文字数を超えているかどうかを判定する
@@ -203,95 +219,46 @@ def split_line_at_max_length(line, indentation_width):
     pass
 
 
-def determine_env_part_line_breaks_and_indentation_widths(env_part_token_lines):
-    tokens = list(itertools.chain.from_iterable(env_part_token_lines))
-    token_sentences = split_env_part_tokens_into_sentences(tokens)
-    output_indentation_widths = []
-    output_token_lines = []
+def split_env_part_token_lines_into_sentences(env_part_token_lines) -> list[list]:
+    # 1次元のトークン列に変換する。この時改行を維持するため空文字列で表現する。
+    tokens = list(
+        itertools.chain.from_iterable(
+            [tokens if len(tokens) != 0 else [""] for tokens in env_part_token_lines]
+        )
+    )
 
-    for tokens in token_sentences:
-        if len(tokens) == 0:
-            output_indentation_widths.append(0)
-            output_token_lines.append([])
-            continue
-        # 目標となるキーワードは必ず行頭に出現することを前提としている
-        elif tokens[0].text == "environ" or tokens[0].token_type == TokenType.COMMENT:
-            output_indentation_widths.append(0)
-            output_token_lines.append([tokens[0]])
-            continue
-
-        (
-            token_lines,
-            indentation_widths,
-        ) = determine_directive_line_breaks_and_indentation_widths(tokens)
-        output_token_lines.extend(token_lines)
-        output_indentation_widths.extend(indentation_widths)
-
-    return output_token_lines, output_indentation_widths
-
-
-# Input: 1行分のDirectiveのトークン列
-# Output: 最大文字数を超えないよう分割した行単位のトークン列、各行のインデント数の配列
-def determine_directive_line_breaks_and_indentation_widths(
-    directive_tokens,
-) -> tuple[list[list], list]:
-    token_lines = []
-    indentation_widths = []
-    current_line_length = option.ENVIRON_DIRECTIVE_INDENTATION_WIDTH
-    current_line_tokens = []
-    # 区切り位置を決定
-    for token in directive_tokens:
-        current_line_length += len(token.text)
-
-        if current_line_length > option.MAX_LINE_LENGTH:
-            carryover_tokens = []
-            # 次の行が[,|;]から開始しないようにする
-            if token.text in [",", ";"]:
-                carryover_tokens.append(current_line_tokens.pop())
-            carryover_tokens.append(token)
-
-            # 現在の行を確定
-            token_lines.append(current_line_tokens)
-
-            # 次の行へ繰り越し
-            current_line_tokens = carryover_tokens
-            current_line_length = option.ENVIRON_LINE_INDENTATION_WIDTH + sum(
-                [len(token.text) for token in carryover_tokens]
-            )
-        else:
-            current_line_tokens.append(token)
-
-        # トークン間のスペース数を加算
-        if token.text == "," or token.text in option.ENV_DIRECTIVE_KEYWORDS:
-            current_line_length += 1
-
-    token_lines.append(current_line_tokens)
-
-    # インデント数の決定
-    for i in range(len(token_lines)):
-        if i == 0:
-            indentation_widths.append(option.ENVIRON_DIRECTIVE_INDENTATION_WIDTH)
-        else:
-            indentation_widths.append(option.ENVIRON_LINE_INDENTATION_WIDTH)
-
-    return token_lines, indentation_widths
-
-
-def split_env_part_tokens_into_sentences(tokens) -> list[list]:
-    output_token_sentences = []
+    token_sentences = []
     current_sentence_tokens = []
-
     for token in tokens:
-        if token.text == "environ" or token.token_type == TokenType.COMMENT:
-            output_token_sentences.append([token])
+        if token == "":
+            token_sentences.append([])
+        elif token.text == "environ" or token.token_type == TokenType.COMMENT:
+            token_sentences.append([token])
         else:
             current_sentence_tokens.append(token)
 
-        if token.text == ";":
-            output_token_sentences.append(current_sentence_tokens)
-            current_sentence_tokens = []
+            if token.text == ";":
+                token_sentences.append(current_sentence_tokens)
+                current_sentence_tokens = []
 
-    return output_token_sentences
+    return token_sentences
+
+
+def determine_env_part_indentation_widths(env_part_token_lines):
+    indentation_widths = []
+
+    for tokens in env_part_token_lines:
+        # 目標となるキーワードは必ず行頭に出現することを前提としている
+        if (
+            len(tokens) == 0
+            or tokens[0].text == "environ"
+            or tokens[0].token_type == TokenType.COMMENT
+        ):
+            indentation_widths.append(0)
+        else:
+            indentation_widths.append(option.ENVIRON_DIRECTIVE_INDENTATION_WIDTH)
+
+    return indentation_widths
 
 
 def determine_body_part_indentation_widths(body_part_token_lines):

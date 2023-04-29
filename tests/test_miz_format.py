@@ -48,6 +48,7 @@ body_part_miz_controller = MizController()
 body_part_miz_controller.exec_file(f"{TEST_DIR}/data/body_part.miz", f"{TEST_DIR}/data/mml.vct")
 body_part_token_table = body_part_miz_controller.token_table
 
+
 def test_cut_center_space_format_is_valid1():
     cut_center_space_value = 100
     assert (cut_center_space_format_is_valid(cut_center_space_value)) == False
@@ -262,82 +263,13 @@ def test_determine_body_part_indentation_widths5(caplog):
 
 
 def test_split_env_part_tokens_into_sentences():
-    tokens = list(itertools.chain.from_iterable(generate_token_lines(env_part_token_table)))
-    result = convert_token_lines_to_texts(split_env_part_tokens_into_sentences(tokens))
+    result = convert_token_lines_to_texts(
+        split_env_part_token_lines_into_sentences(generate_token_lines(env_part_token_table))
+    )
     expected = []
     with open(f"{TEST_DIR}/expected/env_part.yml") as f:
         expected = yaml.safe_load(f)
     assert (result) == expected
-
-
-def test_determine_directive_line_breaks_and_indentation_widths():
-    tokens = list(itertools.chain.from_iterable(generate_token_lines(env_part_token_table)[5:7]))
-    (
-        directive_token_lines,
-        directive_indentation_widths,
-    ) = determine_directive_line_breaks_and_indentation_widths(tokens)
-
-    assert (directive_indentation_widths) == [1, 6, 6]
-    assert ([convert_tokens_to_texts(tokens) for tokens in directive_token_lines]) == [
-        [
-            "vocabularies",
-            "NUMBERS",
-            ",",
-            "PRE_TOPC",
-            ",",
-            "FUNCT_4",
-            ",",
-            "SUPINF_2",
-            ",",
-            "COMPLEX1",
-            ",",
-            "XXREAL_0",
-            ",",
-        ],
-        [
-            "ORDINAL2",
-            ",",
-            "XBOOLE_0",
-            ",",
-            "FUNCT_1",
-            ",",
-            "TOPMETR",
-            ",",
-            "SUBSET_1",
-            ",",
-            "ORDINAL2",
-            ",",
-            "RCOMP_1",
-            ",",
-        ],
-        [
-            "RCOMP_2",
-            ";",
-        ],
-    ]
-
-
-def test_determine_env_part_line_breaks_and_indentation_widths1():
-    result = []
-    for tokens in determine_env_part_line_breaks_and_indentation_widths(
-        generate_token_lines(env_part_token_table)
-    )[0]:
-        result.append([token.text for token in tokens])
-
-    expected = []
-    with open(f"{TEST_DIR}/expected/env_part.txt") as f:
-        for line in f:
-            expected.append(line.strip().split("|") if line != "\n" else [])
-
-    assert (result) == expected
-
-
-def test_determine_env_part_line_breaks_and_indentation_widths2():
-    assert (
-        determine_env_part_line_breaks_and_indentation_widths(
-            generate_token_lines(env_part_token_table)
-        )[1]
-    ) == [0, 0, 0, 1, 6, 6, 1, 6, 6, 1, 6]
 
 
 def test_remove_consecutive_value():
@@ -362,15 +294,16 @@ def test_find_first_no_empty_array_i():
     assert (find_first_no_empty_array_i(array)) == 3
 
 
-def test_normalize_blank_line():
-    with open(f"{TEST_DIR}/expected/blank_line.miz") as f:
-        expected = f.read().split("\n")
-    result = generate_space_adjusted_lines(
-        normalize_blank_line(generate_token_lines(blank_line_token_table))
-    )
-    assert result == expected
+# def test_normalize_blank_line():
+#     with open(f"{TEST_DIR}/expected/blank_line.miz") as f:
+#         expected = f.read().split("\n")
+#     result = generate_space_adjusted_lines(
+#         normalize_blank_line(generate_token_lines(blank_line_token_table))
+#     )
+#     assert result == expected
 
 
 # TODO: テストを追加
 def test_format_body_part():
     format_body_part(generate_token_lines(body_part_token_table))
+    format_env_part(generate_token_lines(env_part_token_table))

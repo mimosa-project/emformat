@@ -1,6 +1,8 @@
 - [":: Fan Homeomorphisms in the Plane"]
 - ["::  by Yatsuka Nakamura"]
+- []
 - [environ]
+- []
 - 
   - vocabularies
   - NUMBERS
@@ -31,7 +33,6 @@
   - ","
   - RCOMP_2
   - ;
-
 - 
   - notations
   - TARSKI
