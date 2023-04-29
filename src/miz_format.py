@@ -177,11 +177,10 @@ def format(token_table):
 
 
 def format_env_part(env_part_token_lines):
-    # 元の改行位置は無視する
+    # 元の改行位置は無視して一度文単位に変換する
     normalized_token_lines = normalize_blank_line(
         split_env_part_token_lines_into_sentences(env_part_token_lines)
     )
-
     indentation_widths = determine_env_part_indentation_widths(normalized_token_lines)
     space_adjusted_lines = generate_space_adjusted_lines(normalized_token_lines)
 
