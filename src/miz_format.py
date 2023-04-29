@@ -230,12 +230,12 @@ def determine_directive_line_breaks_and_indentation_widths(
     indentation_widths = []
     current_line_length = option.ENVIRON_DIRECTIVE_INDENTATION_WIDTH
     current_line_tokens = []
-    carryover_tokens = []
     # 区切り位置を決定
     for token in directive_tokens:
         current_line_length += len(token.text)
 
         if current_line_length > option.MAX_LINE_LENGTH:
+            carryover_tokens = []
             # 次の行が[,|;]から開始しないようにする
             if token.text in [",", ";"]:
                 carryover_tokens.append(current_line_tokens.pop())
@@ -244,12 +244,11 @@ def determine_directive_line_breaks_and_indentation_widths(
             # 現在の行を確定
             token_lines.append(current_line_tokens)
 
-            # 初期化
+            # 次の行へ繰り越し
+            current_line_tokens = carryover_tokens
             current_line_length = option.ENVIRON_LINE_INDENTATION_WIDTH + sum(
                 [len(token.text) for token in carryover_tokens]
             )
-            current_line_tokens = carryover_tokens
-            carryover_tokens = []
         else:
             current_line_tokens.append(token)
 
