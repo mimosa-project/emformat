@@ -19,10 +19,10 @@ miz_controller.exec_file(f"{TEST_DIR}/data/jgraph_4.miz", f"{TEST_DIR}/data/mml.
 
 miz_controller2 = MizController()
 miz_controller2.exec_file(f"{TEST_DIR}/data/tarski_0.miz", f"{TEST_DIR}/data/mml.vct")
-miz_controller2.exec_file(f"{TEST_DIR}/data/tarski_0.miz", "f{TEST_DIR}/data/mml.vct")
+miz_controller2.exec_file(f"{TEST_DIR}/data/tarski_0.miz", f"{TEST_DIR}/data/mml.vct")
 
 blank_line_miz_controller = MizController()
-blank_line_miz_controller.exec_file(f"{TEST_DIR}/data/blank_line.miz", "f{TEST_DIR}/data/mml.vct")
+blank_line_miz_controller.exec_file(f"{TEST_DIR}/data/blank_line.miz", f"{TEST_DIR}/data/mml.vct")
 blank_line_token_table = blank_line_miz_controller.token_table
 
 token_table = miz_controller.token_table
