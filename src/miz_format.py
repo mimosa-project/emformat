@@ -313,52 +313,46 @@ def determine_body_part_indentation_widths(body_part_token_lines):
             )
             sys.exit(1)
 
-        # インデント数の決定と、インデント段階の変更
+        # ブロックレベルの調整
         if first_token_text in option.BLOCK_KEYWORDS:
-            if current_block_type == "theorem" and first_token_text == "proof":
-                if not is_top_level_proof:
-                    current_indentation_level -= 1
-                    is_top_level_proof = True
-                indentation_widths.append(
-                    current_indentation_level * option.STANDARD_INDENTATION_WIDTH
-                )
+            if not (
+                current_block_type == "scheme"
+                and first_token_text == "proof"
+                and is_top_level_proof
+            ):
+                # schemeブロックの最初のproof以外はblock levelを+1
                 current_block_level += 1
-                current_indentation_level += 1
-            elif current_block_type == "scheme" and first_token_text == "proof":
-                if not is_top_level_proof:
-                    current_indentation_level -= 1
-                    is_top_level_proof = True
-                else:
-                    current_block_level += 1
-                indentation_widths.append(
-                    current_indentation_level * option.STANDARD_INDENTATION_WIDTH
-                )
-                current_indentation_level += 1
-            else:
-                indentation_widths.append(
-                    current_indentation_level * option.STANDARD_INDENTATION_WIDTH
-                )
-                current_block_level += 1
-                current_indentation_level += 1
-        elif first_token_text == "provided":
-            current_indentation_level -= 1
-            indentation_widths.append(current_indentation_level * option.STANDARD_INDENTATION_WIDTH)
-            current_indentation_level += 1
         elif first_token_text == "end":
             current_block_level -= 1
+
+        # インデント数の決定と、インデント段階の変更
+        # Pre-indentation width
+        if (
+            current_block_type in ["theorem", "scheme"]
+            and first_token_text == "proof"
+            and is_top_level_proof
+        ) or first_token_text in ["provided", "end"]:
+            # theorem/schemeのブロック内で最初のproof，またはprovided/endであればインデントを-1
             current_indentation_level -= 1
-            indentation_widths.append(current_indentation_level * option.STANDARD_INDENTATION_WIDTH)
-        else:
-            indentation_widths.append(current_indentation_level * option.STANDARD_INDENTATION_WIDTH)
+
+        indentation_widths.append(current_indentation_level * option.STANDARD_INDENTATION_WIDTH)
+
+        # Post-indentation width
+        if first_token_text in option.BLOCK_KEYWORDS or first_token_text == "provided":
+            # 字下げキーワードまたはprovided以降はインデントを+1
+            current_indentation_level += 1
+
+        if first_token_text == "proof":
+            is_top_level_proof = False
 
         # Theoremブロックの開始/終了判定
         if first_token_text == "theorem":
             current_block_type = "theorem"
-            is_top_level_proof = False
+            is_top_level_proof = True
             current_block_level = 1
         elif current_block_type == "theorem":
             if (first_token_text == "end" and current_block_level == 1) or (
-                not is_top_level_proof and ";" in token_texts(tokens)
+                is_top_level_proof and ";" in token_texts(tokens)
             ):
                 current_block_type = ""
                 current_block_level = 0
@@ -366,7 +360,7 @@ def determine_body_part_indentation_widths(body_part_token_lines):
         # Schemeブロックの開始/終了判定
         if first_token_text == "scheme":
             current_block_type = "scheme"
-            is_top_level_proof = False
+            is_top_level_proof = True
             current_block_level = 1
         elif current_block_type == "scheme":
             if first_token_text == "end" and current_block_level == 0:
