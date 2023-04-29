@@ -302,10 +302,15 @@ def determine_body_part_indentation_widths(body_part_token_lines):
 
         # ブロックの開始/終了の整合性をチェックする
         if first_token_text in option.TOP_BLOCK_KEYWORDS and current_block_level > 0:
-            logging.error("Expected 'end'")
+            logging.error(
+                f"Expected 'end' on line {tokens[0].line_number}, column {tokens[0].column_number}"
+            )
             sys.exit(1)
         elif first_token_text == "end" and current_block_level == 0:
-            logging.error("There are 'end' without a corresponding keyword")
+            logging.error(
+                "There are 'end' without a corresponding keyword on line "
+                f"{tokens[0].line_number}, column {tokens[0].column_number}"
+            )
             sys.exit(1)
 
         # インデント数の決定と、インデント段階の変更
