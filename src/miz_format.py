@@ -18,14 +18,10 @@ def main(argv):
     miz_controller = MizController()
     miz_controller.exec_file(miz_path, vct_path)
     token_table = miz_controller.token_table
-    ast_root = miz_controller.ast_root
-
-    input_lines = []
-    with open(miz_path, "r", encoding="utf-8") as f:
-        input_lines = f.read().split("\n")
 
     load_settings()
-    format(input_lines, token_table, ast_root)
+    formatted_lines = format(token_table)
+    output(formatted_lines)
 
 
 def load_settings():
@@ -42,10 +38,6 @@ def load_settings():
                 setting_value = {tuple(k.split()): v for k, v in setting_value.items()}
 
             setattr(option, setting_key, setting_value)
-
-
-def format(input_lines, token_table, ast_root):
-    output(generate_space_adjusted_lines(generate_token_lines(token_table)))
 
 
 def output(output_lines):
@@ -173,6 +165,42 @@ def convert_token_lines_to_texts(token_lines):
         texts.append(convert_tokens_to_texts(tokens))
 
     return texts
+
+
+def format(token_table):
+    # TODO: generate_token_lines の中で、特定のキーワードの前後に改行を入れる処理を呼び出す
+    token_lines = generate_token_lines(token_table)
+    env_part_token_lines, body_part_token_lines = split_into_env_and_body_part(token_lines)
+    env_part_lines = format_env_part(env_part_token_lines)
+    body_part_lines = format_body_part(body_part_token_lines)
+    return env_part_lines + body_part_lines
+
+
+def format_env_part(env_part_token_lines):
+    pass
+
+
+def format_body_part(body_part_token_lines):
+    normalized_token_lines = normalize_blank_line(body_part_token_lines)
+    indentation_widths = determine_body_part_indentation_widths(normalized_token_lines)
+    space_adjusted_lines = generate_space_adjusted_lines(normalized_token_lines)
+
+    output_lines = []
+    for indentation_width, line in zip(indentation_widths, space_adjusted_lines):
+        line = f"{' ' * indentation_width}{line}"
+        # TODO: ここで split_lines_at_max_length を呼び出す
+        # output_lines.extend(split_line_at_max_length(line))
+        output_lines.extend(line)
+
+
+# TODO: 各行が最大文字数を超えているかどうかを判定する
+def is_exceeded_max_line_length(line):
+    pass
+
+
+# TODO: テキストを入力とし、指定された最大文字数を超える場合、最大文字数以内で分割する
+def split_line_at_max_length():
+    pass
 
 
 def determine_indentation_widths(token_lines) -> list[int]:

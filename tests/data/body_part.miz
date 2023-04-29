@@ -1,0 +1,23 @@
+begin :: Semilattice of type widening
+definition
+let T be RelStr;
+attr T is Noetherian means
+:Def1:
+the InternalRel of T is co-well_founded;
+end;
+registration
+cluster -> Noetherian for 1-element RelStr;
+coherence
+proof
+let S be 1-element RelStr;
+let Y be set;
+set R = the InternalRel of S;
+assume
+A1: Y c= field R;
+assume Y <> {};
+then reconsider X = Y as non empty set;
+set a = the Element of X;
+take a;
+thus a in Y;
+end;
+end;

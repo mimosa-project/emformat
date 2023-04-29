@@ -44,6 +44,9 @@ env_part_miz_controller = MizController()
 env_part_miz_controller.exec_file(f"{TEST_DIR}/data/env_part.miz", f"{TEST_DIR}/data/mml.vct")
 env_part_token_table = env_part_miz_controller.token_table
 
+body_part_miz_controller = MizController()
+body_part_miz_controller.exec_file(f"{TEST_DIR}/data/body_part.miz", f"{TEST_DIR}/data/mml.vct")
+body_part_token_table = body_part_miz_controller.token_table
 
 def test_cut_center_space_format_is_valid1():
     cut_center_space_value = 100
@@ -366,3 +369,8 @@ def test_normalize_blank_line():
         normalize_blank_line(generate_token_lines(blank_line_token_table))
     )
     assert result == expected
+
+
+# TODO: テストを追加
+def test_format_body_part():
+    format_body_part(generate_token_lines(body_part_token_table))
