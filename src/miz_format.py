@@ -45,7 +45,7 @@ def load_settings():
 
 
 def format(input_lines, token_table, ast_root):
-    output(space_adjusted_lines(tokens_by_line(token_table)))
+    output(space_adjusted_lines(token_lines(token_table)))
 
 
 def output(output_lines):
@@ -74,16 +74,16 @@ def convert_to_token_representative_name(token):
         return token.text
 
 
-def tokens_by_line(token_table):
+def token_lines(token_table):
     last_line_number = token_table.last_token.line_number
-    tokens_by_line = [[] for _ in range(last_line_number)]
+    token_lines = [[] for _ in range(last_line_number)]
 
     for i in range(token_table.token_num):
         token = token_table.token(i)
         line_number = token.line_number
-        tokens_by_line[line_number - 1].append(token)
+        token_lines[line_number - 1].append(token)
 
-    return tokens_by_line
+    return token_lines
 
 
 # 実際にはmizcore側に実装
@@ -153,10 +153,10 @@ def space_adjusted_line(tokens):
     return output_line.lstrip()
 
 
-def space_adjusted_lines(tokens_by_line):
+def space_adjusted_lines(token_lines):
     output_lines = []
 
-    for tokens in tokens_by_line:
+    for tokens in token_lines:
         output_lines.append(space_adjusted_line(tokens))
     return output_lines
 
@@ -167,72 +167,68 @@ def token_texts(tokens):
     return [token.text for token in tokens]
 
 
-def convert_tokens_by_line_to_token_texts(tokens_by_line):
+def convert_token_lines_to_token_texts(token_lines):
     texts = []
-    for tokens in tokens_by_line:
+    for tokens in token_lines:
         texts.append(token_texts(tokens))
 
     return texts
 
 
-def determine_indentation_numbers(tokens_by_line) -> list[int]:
+def determine_indentation_widths(token_lines) -> list[int]:
     # 環境部と本体部で分けて処理する
-    environ_part_tokens_by_line, body_part_tokens_by_line = split_into_environ_and_body_part(
-        tokens_by_line
-    )
+    env_part_token_lines, body_part_token_lines = split_into_env_and_body_part(token_lines)
 
     (
-        environ_part_indentation_numbers,
-        environ_part_tokens_by_line,
-    ) = determine_environ_part_line_breaks_and_indentation_numbers(environ_part_tokens_by_line)
+        env_part_indentation_widths,
+        env_part_token_lines,
+    ) = determine_env_part_line_breaks_and_indentation_widths(env_part_token_lines)
 
-    body_part_indentation_numbers = determine_body_part_indentation_numbers(
-        body_part_tokens_by_line
-    )
+    body_part_indentation_widths = determine_body_part_indentation_widths(body_part_token_lines)
 
-    output_tokens_by_line = environ_part_tokens_by_line + body_part_tokens_by_line
-    indentation_numbers = environ_part_indentation_numbers + body_part_indentation_numbers
+    output_token_lines = env_part_token_lines + body_part_token_lines
+    indentation_widths = env_part_indentation_widths + body_part_indentation_widths
 
-    return indentation_numbers, output_tokens_by_line
+    return indentation_widths, output_token_lines
 
 
-def determine_environ_part_line_breaks_and_indentation_numbers(environ_part_tokens_by_line):
-    tokens = list(itertools.chain.from_iterable(environ_part_tokens_by_line))
-    tokens_by_sentence = split_environ_part_tokens_into_sentences(tokens)
-    output_indentation_numbers = []
-    output_tokens_by_line = []
+def determine_env_part_line_breaks_and_indentation_widths(env_part_token_lines):
+    tokens = list(itertools.chain.from_iterable(env_part_token_lines))
+    token_sentences = split_env_part_tokens_into_sentences(tokens)
+    output_indentation_widths = []
+    output_token_lines = []
 
-    for tokens in tokens_by_sentence:
+    for tokens in token_sentences:
         if len(tokens) == 0:
-            output_indentation_numbers.append(0)
-            output_tokens_by_line.append([])
+            output_indentation_widths.append(0)
+            output_token_lines.append([])
             continue
         # 目標となるキーワードは必ず行頭に出現することを前提としている
         elif tokens[0].text == "environ" or tokens[0].token_type == TokenType.COMMENT:
-            output_indentation_numbers.append(0)
-            output_tokens_by_line.append([tokens[0]])
+            output_indentation_widths.append(0)
+            output_token_lines.append([tokens[0]])
             continue
 
         (
-            tokens_by_line,
-            indentation_numbers,
-        ) = determine_directive_line_breaks_and_indentation_numbers(tokens)
-        output_tokens_by_line.extend(tokens_by_line)
-        output_indentation_numbers.extend(indentation_numbers)
+            token_lines,
+            indentation_widths,
+        ) = determine_directive_line_breaks_and_indentation_widths(tokens)
+        output_token_lines.extend(token_lines)
+        output_indentation_widths.extend(indentation_widths)
 
-    output_tokens_by_line.append([])
-    output_indentation_numbers.append(0)
-    return output_tokens_by_line, output_indentation_numbers
+    output_token_lines.append([])
+    output_indentation_widths.append(0)
+    return output_token_lines, output_indentation_widths
 
 
 # Input: 1行分のDirectiveのトークン列
 # Output: 最大文字数を超えないよう分割した行単位のトークン列、各行のインデント数の配列
-def determine_directive_line_breaks_and_indentation_numbers(
+def determine_directive_line_breaks_and_indentation_widths(
     directive_tokens,
 ) -> tuple[list[list], list]:
-    tokens_by_line = []
-    indentation_numbers = []
-    current_line_length = option.ENVIRON_TOP_INDENTATION_SPACE_NUMBER
+    token_lines = []
+    indentation_widths = []
+    current_line_length = option.ENVIRON_DIRECTIVE_INDENTATION_WIDTH
     current_line_tokens = []
     carryover_tokens = []
     # 区切り位置を決定
@@ -246,10 +242,10 @@ def determine_directive_line_breaks_and_indentation_numbers(
             carryover_tokens.append(token)
 
             # 現在の行を確定
-            tokens_by_line.append(current_line_tokens)
+            token_lines.append(current_line_tokens)
 
             # 初期化
-            current_line_length = option.ENVIRON_IN_LINE_INDENTATION_SPACE_NUMBER + sum(
+            current_line_length = option.ENVIRON_LINE_INDENTATION_WIDTH + sum(
                 [len(token.text) for token in carryover_tokens]
             )
             current_line_tokens = carryover_tokens
@@ -258,61 +254,61 @@ def determine_directive_line_breaks_and_indentation_numbers(
             current_line_tokens.append(token)
 
         # トークン間のスペース数を加算
-        if token.text == "," or token.text in option.ENVIRON_TAGS:
+        if token.text == "," or token.text in option.ENV_DIRECTIVE_KEYWORDS:
             current_line_length += 1
 
-    tokens_by_line.append(current_line_tokens)
+    token_lines.append(current_line_tokens)
 
     # インデント数の決定
-    for i in range(len(tokens_by_line)):
+    for i in range(len(token_lines)):
         if i == 0:
-            indentation_numbers.append(option.ENVIRON_TOP_INDENTATION_SPACE_NUMBER)
+            indentation_widths.append(option.ENVIRON_DIRECTIVE_INDENTATION_WIDTH)
         else:
-            indentation_numbers.append(option.ENVIRON_IN_LINE_INDENTATION_SPACE_NUMBER)
+            indentation_widths.append(option.ENVIRON_LINE_INDENTATION_WIDTH)
 
-    return tokens_by_line, indentation_numbers
+    return token_lines, indentation_widths
 
 
-def split_environ_part_tokens_into_sentences(tokens) -> list[list]:
-    output_tokens_by_sentence = []
+def split_env_part_tokens_into_sentences(tokens) -> list[list]:
+    output_token_sentences = []
     current_sentence_tokens = []
 
     for token in tokens:
         if token.text == "environ":
-            output_tokens_by_sentence.extend([[], [token], []])
+            output_token_sentences.extend([[], [token], []])
         elif token.token_type == TokenType.COMMENT:
-            output_tokens_by_sentence.append([token])
+            output_token_sentences.append([token])
         else:
             current_sentence_tokens.append(token)
             if token.text == ";":
-                output_tokens_by_sentence.append(current_sentence_tokens)
+                output_token_sentences.append(current_sentence_tokens)
                 current_sentence_tokens = []
 
-    if output_tokens_by_sentence[0] == []:
-        output_tokens_by_sentence.pop(0)
+    if output_token_sentences[0] == []:
+        output_token_sentences.pop(0)
 
-    return output_tokens_by_sentence
+    return output_token_sentences
 
 
-def determine_body_part_indentation_numbers(body_part_tokens_by_line):
-    indentation_numbers = []
-    current_indentation_step = 0
+def determine_body_part_indentation_widths(body_part_token_lines):
+    indentation_widths = []
+    current_indentation_level = 0
     current_block_level = 0
     # Theorem, Scheme ブロック内でのみ利用
     current_block_type = ""
-    proof_found = False
+    is_top_level_proof = False
 
     # インデントの決定の目標となるキーワードは、必ず行頭に出現することを前提としている
     # adjust_newline_position で実装
-    for tokens in body_part_tokens_by_line:
+    for tokens in body_part_token_lines:
         if tokens == []:
-            indentation_numbers.append(0)
+            indentation_widths.append(0)
             continue
 
         first_token_text = tokens[0].text
 
         # ブロックの開始/終了の整合性をチェックする
-        if first_token_text in option.TOP_OF_BLOCK_TAGS and current_block_level > 0:
+        if first_token_text in option.TOP_BLOCK_KEYWORDS and current_block_level > 0:
             logging.error("Expected 'end'")
             sys.exit(1)
         elif first_token_text == "end" and current_block_level == 0:
@@ -320,57 +316,51 @@ def determine_body_part_indentation_numbers(body_part_tokens_by_line):
             sys.exit(1)
 
         # インデント数の決定と、インデント段階の変更
-        if first_token_text in option.USE_INDENT_TAGS:
+        if first_token_text in option.BLOCK_KEYWORDS:
             if current_block_type == "theorem" and first_token_text == "proof":
-                if not proof_found:
-                    current_indentation_step -= 1
-                    proof_found = True
-                indentation_numbers.append(
-                    current_indentation_step * option.SPACE_NUMBER_PER_INDENTATION
+                if not is_top_level_proof:
+                    current_indentation_level -= 1
+                    is_top_level_proof = True
+                indentation_widths.append(
+                    current_indentation_level * option.STANDARD_INDENTATION_WIDTH
                 )
                 current_block_level += 1
-                current_indentation_step += 1
+                current_indentation_level += 1
             elif current_block_type == "scheme" and first_token_text == "proof":
-                if not proof_found:
-                    current_indentation_step -= 1
-                    proof_found = True
+                if not is_top_level_proof:
+                    current_indentation_level -= 1
+                    is_top_level_proof = True
                 else:
                     current_block_level += 1
-                indentation_numbers.append(
-                    current_indentation_step * option.SPACE_NUMBER_PER_INDENTATION
+                indentation_widths.append(
+                    current_indentation_level * option.STANDARD_INDENTATION_WIDTH
                 )
-                current_indentation_step += 1
+                current_indentation_level += 1
             else:
-                indentation_numbers.append(
-                    current_indentation_step * option.SPACE_NUMBER_PER_INDENTATION
+                indentation_widths.append(
+                    current_indentation_level * option.STANDARD_INDENTATION_WIDTH
                 )
                 current_block_level += 1
-                current_indentation_step += 1
+                current_indentation_level += 1
         elif first_token_text == "provided":
-            current_indentation_step -= 1
-            indentation_numbers.append(
-                current_indentation_step * option.SPACE_NUMBER_PER_INDENTATION
-            )
-            current_indentation_step += 1
+            current_indentation_level -= 1
+            indentation_widths.append(current_indentation_level * option.STANDARD_INDENTATION_WIDTH)
+            current_indentation_level += 1
         elif first_token_text == "end":
             current_block_level -= 1
-            current_indentation_step -= 1
-            indentation_numbers.append(
-                current_indentation_step * option.SPACE_NUMBER_PER_INDENTATION
-            )
+            current_indentation_level -= 1
+            indentation_widths.append(current_indentation_level * option.STANDARD_INDENTATION_WIDTH)
         else:
-            indentation_numbers.append(
-                current_indentation_step * option.SPACE_NUMBER_PER_INDENTATION
-            )
+            indentation_widths.append(current_indentation_level * option.STANDARD_INDENTATION_WIDTH)
 
         # Theoremブロックの開始/終了判定
         if first_token_text == "theorem":
             current_block_type = "theorem"
-            proof_found = False
+            is_top_level_proof = False
             current_block_level = 1
         elif current_block_type == "theorem":
             if (first_token_text == "end" and current_block_level == 1) or (
-                not proof_found and ";" in token_texts(tokens)
+                not is_top_level_proof and ";" in token_texts(tokens)
             ):
                 current_block_type = ""
                 current_block_level = 0
@@ -378,14 +368,14 @@ def determine_body_part_indentation_numbers(body_part_tokens_by_line):
         # Schemeブロックの開始/終了判定
         if first_token_text == "scheme":
             current_block_type = "scheme"
-            proof_found = False
+            is_top_level_proof = False
             current_block_level = 1
         elif current_block_type == "scheme":
             if first_token_text == "end" and current_block_level == 0:
                 current_block_type = ""
                 current_block_level = 0
 
-    return indentation_numbers
+    return indentation_widths
 
 
 # TODO: 特定のキーワードの前後で改行を挿入する
@@ -393,8 +383,8 @@ def adjust_newline_position(token_by_lines):
     pass
 
 
-def split_into_environ_and_body_part(tokens_by_line):
-    for current_line_number, tokens in enumerate(tokens_by_line):
+def split_into_env_and_body_part(token_lines):
+    for current_line_number, tokens in enumerate(token_lines):
         if tokens == []:
             continue
 
@@ -403,43 +393,43 @@ def split_into_environ_and_body_part(tokens_by_line):
             init_token.token_type == TokenType.KEYWORD
             and init_token.keyword_type == KeywordType.BEGIN_
         ):
-            return tokens_by_line[:current_line_number], tokens_by_line[current_line_number:]
+            return token_lines[:current_line_number], token_lines[current_line_number:]
 
 
-def normalize_blank_line(tokens_by_line):
-    output_tokens_by_line = []
+def normalize_blank_line(token_lines):
+    output_token_lines = []
 
     # 空行の挿入
-    for current_line, tokens in enumerate(tokens_by_line):
+    for current_line, tokens in enumerate(token_lines):
         if tokens == []:
-            output_tokens_by_line.append(tokens)
+            output_token_lines.append(tokens)
             continue
 
         first_token_text = tokens[0].text
-        before_comment_line_number = count_comment_lines_before(tokens_by_line, current_line)
+        before_comment_line_number = count_comment_lines_before(token_lines, current_line)
         add_blank_line_number = (
             -1 * before_comment_line_number
             if before_comment_line_number
-            else len(output_tokens_by_line)
+            else len(output_token_lines)
         )
-        if first_token_text in option.USE_BEFORE_BLANK_LINE:
-            output_tokens_by_line.insert(add_blank_line_number, [])
-        output_tokens_by_line.append(tokens)
-        if first_token_text in option.USE_AFTER_BLANK_LINE:
-            output_tokens_by_line.append([])
+        if first_token_text in option.KEYWORDS_INSERT_BLANK_LINE_BEFORE:
+            output_token_lines.insert(add_blank_line_number, [])
+        output_token_lines.append(tokens)
+        if first_token_text in option.KEYWORDS_INSERT_BLANK_LINE_AFTER:
+            output_token_lines.append([])
 
-    first_no_empty_array_i = find_first_no_empty_array_i(output_tokens_by_line)
+    first_no_empty_array_i = find_first_no_empty_array_i(output_token_lines)
 
-    return remove_consecutive_value(output_tokens_by_line[first_no_empty_array_i:], value=[])
+    return remove_consecutive_value(output_token_lines[first_no_empty_array_i:], value=[])
 
 
-def count_comment_lines_before(tokens_by_line, target_line):
+def count_comment_lines_before(token_lines, target_line):
     comment_line_number = 0
     for line in reversed(range(target_line)):
-        if tokens_by_line[line] == []:
+        if token_lines[line] == []:
             return comment_line_number
 
-        first_token_type = tokens_by_line[line][0].token_type
+        first_token_type = token_lines[line][0].token_type
         if first_token_type != TokenType.COMMENT:
             return comment_line_number
 

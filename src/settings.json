@@ -1,8 +1,8 @@
 {
   "MAX_LINE_LENGTH": 80,
-  "SPACE_NUMBER_PER_INDENTATION": 2,
-  "ENVIRON_TOP_INDENTATION_SPACE_NUMBER": 1,
-  "ENVIRON_IN_LINE_INDENTATION_SPACE_NUMBER": 6,
+  "STANDARD_INDENTATION_WIDTH": 2,
+  "ENVIRON_DIRECTIVE_INDENTATION_WIDTH": 1,
+  "ENVIRON_LINE_INDENTATION_WIDTH": 6,
   "ALONE_KEYWORDS": [
     "definition",
     "registration",
@@ -24,7 +24,7 @@
     "reducibility",
     "end"
   ],
-  "ENVIRON_TAGS": [
+  "ENV_DIRECTIVE_KEYWORDS": [
     "vocabularies",
     "notations",
     "constructors",
@@ -36,7 +36,7 @@
     "schemes",
     "requirements"
   ],
-  "USE_INDENT_TAGS": [
+  "BLOCK_KEYWORDS": [
     "definition",
     "registration",
     "notation",
@@ -48,14 +48,14 @@
     "now",
     "proof"
   ],
-  "TOP_OF_BLOCK_TAGS": [
+  "TOP_BLOCK_KEYWORDS": [
     "definition",
     "registration",
     "notation",
     "theorem",
     "scheme"
   ],
-  "USE_BEFORE_BLANK_LINE": [
+  "KEYWORDS_INSERT_BLANK_LINE_BEFORE": [
     "definition",
     "registration",
     "notation",
@@ -64,7 +64,7 @@
     "begin",
     "environ"
   ],
-  "USE_AFTER_BLANK_LINE": [
+  "KEYWORDS_INSERT_BLANK_LINE_AFTER": [
     "begin",
     "environ"
   ],
