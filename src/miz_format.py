@@ -189,7 +189,7 @@ def format_body_part(body_part_token_lines):
     for indentation_width, line in zip(indentation_widths, space_adjusted_lines):
         line = f"{' ' * indentation_width}{line}"
         # TODO: ここで split_lines_at_max_length を呼び出す
-        # output_lines.extend(split_line_at_max_length(line))
+        # output_lines.extend(split_line_at_max_length(line, indentation_width))
         output_lines.extend(line)
 
 
@@ -199,25 +199,8 @@ def is_exceeded_max_line_length(line):
 
 
 # TODO: テキストを入力とし、指定された最大文字数を超える場合、最大文字数以内で分割する
-def split_line_at_max_length():
+def split_line_at_max_length(line, indentation_width):
     pass
-
-
-def determine_indentation_widths(token_lines) -> list[int]:
-    # 環境部と本体部で分けて処理する
-    env_part_token_lines, body_part_token_lines = split_into_env_and_body_part(token_lines)
-
-    (
-        env_part_indentation_widths,
-        env_part_token_lines,
-    ) = determine_env_part_line_breaks_and_indentation_widths(env_part_token_lines)
-
-    body_part_indentation_widths = determine_body_part_indentation_widths(body_part_token_lines)
-
-    output_token_lines = env_part_token_lines + body_part_token_lines
-    indentation_widths = env_part_indentation_widths + body_part_indentation_widths
-
-    return indentation_widths, output_token_lines
 
 
 def determine_env_part_line_breaks_and_indentation_widths(env_part_token_lines):
