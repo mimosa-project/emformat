@@ -332,7 +332,7 @@ def test_determine_env_part_line_breaks_and_indentation_widths2():
         determine_env_part_line_breaks_and_indentation_widths(
             token_lines(env_part_token_table)
         )[1]
-    ) == [0, 0, 0, 0, 0, 1, 6, 6, 1, 6, 6, 1, 6, 0]
+    ) == [0, 0, 0, 1, 6, 6, 1, 6, 6, 1, 6]
 
 
 def test_remove_consecutive_value():

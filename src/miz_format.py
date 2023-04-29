@@ -216,8 +216,6 @@ def determine_env_part_line_breaks_and_indentation_widths(env_part_token_lines):
         output_token_lines.extend(token_lines)
         output_indentation_widths.extend(indentation_widths)
 
-    output_token_lines.append([])
-    output_indentation_widths.append(0)
     return output_token_lines, output_indentation_widths
 
 
@@ -273,18 +271,14 @@ def split_env_part_tokens_into_sentences(tokens) -> list[list]:
     current_sentence_tokens = []
 
     for token in tokens:
-        if token.text == "environ":
-            output_token_sentences.extend([[], [token], []])
-        elif token.token_type == TokenType.COMMENT:
+        if token.text == "environ" or token.token_type == TokenType.COMMENT:
             output_token_sentences.append([token])
         else:
             current_sentence_tokens.append(token)
-            if token.text == ";":
-                output_token_sentences.append(current_sentence_tokens)
-                current_sentence_tokens = []
 
-    if output_token_sentences[0] == []:
-        output_token_sentences.pop(0)
+        if token.text == ";":
+            output_token_sentences.append(current_sentence_tokens)
+            current_sentence_tokens = []
 
     return output_token_sentences
 

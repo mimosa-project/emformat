@@ -1,8 +1,6 @@
 :: Fan Homeomorphisms in the Plane
 ::  by Yatsuka Nakamura
-
 environ
-
 vocabularies|NUMBERS|,|PRE_TOPC|,|FUNCT_4|,|SUPINF_2|,|COMPLEX1|,|XXREAL_0|,
 ORDINAL2|,|XBOOLE_0|,|FUNCT_1|,|TOPMETR|,|SUBSET_1|,|ORDINAL2|,|RCOMP_1|,
 RCOMP_2|;
@@ -11,4 +9,3 @@ STRUCT_0|,|PARTFUN1|,|TOPMETR|,|RLVECT_1|,|EUCLID|,|FUNCT_4|,|PRE_TOPC|,
 RLTOPSP1|;
 constructors|FUNCT_4|,|REAL_1|,|SQUARE_1|,|BINOP_2|,|COMPLEX1|,|TOPS_2|,|COMPTS_1|,
 TBSP_1|,|TOPMETR|,|PSCOMP_1|,|FUNCSDOM|,|PCOMPS_1|;
-
