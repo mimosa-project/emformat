@@ -315,7 +315,7 @@ def test_find_first_no_empty_array_i():
 
 # TODO: テストを追加
 def test_format_env_part():
-    assert(format_env_part(generate_token_lines(env_part_token_table))) == [
+    assert (format_env_part(generate_token_lines(env_part_token_table))) == [
         ":: Fan Homeomorphisms in the Plane",
         "::  by Yatsuka Nakamura",
         "",
@@ -328,10 +328,31 @@ def test_format_env_part():
         "      STRUCT_0, PARTFUN1, TOPMETR, RLVECT_1, EUCLID, FUNCT_4, PRE_TOPC,",
         "      RLTOPSP1;",
         " constructors FUNCT_4, REAL_1, SQUARE_1, BINOP_2, COMPLEX1, TOPS_2, COMPTS_1,",
-        "      TBSP_1, TOPMETR, PSCOMP_1, FUNCSDOM, PCOMPS_1;"
+        "      TBSP_1, TOPMETR, PSCOMP_1, FUNCSDOM, PCOMPS_1;",
     ]
-    
 
-# TODO: テストを追加
-# def test_format_body_part():
-#     format_body_part(generate_token_lines(body_part_token_table))
+
+# TODO: mizcoreのis_separatableが実装されたら修正する
+def test_format_body_part():
+    assert(format_body_part(generate_token_lines(body_part_token_table))) == [
+        "begin :: Semilattice of type widening",
+        "",
+        "definition",
+        "  for x, y being Element of Class R, v, w being Element of M st x = Class (R,",
+        "  v) & y = Class (R, w) holds it . (x, y) = Class (R, v * w) if M is non empty",
+        "  otherwise it = {};",
+        "  correctness",
+        "  proof",
+        "    A1: M is not empty implies ex b being BinOp of Class R st for x, y being",
+        "    Element of Class R, v, w being Element of M st x = Class (R, v) & y = Class",
+        "    (R, w) holds b . (x, y) = Class (R, v * w)",
+        "  end;",
+        "end;",
+        "",
+        "registration",
+        "  coherence",
+        "  proof",
+        "    let Y be set;",
+        "  end;",
+        "end;"
+    ]

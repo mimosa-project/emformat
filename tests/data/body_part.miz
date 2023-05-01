@@ -1,23 +1,14 @@
 begin :: Semilattice of type widening
 definition
-let T be RelStr;
-attr T is Noetherian means
-:Def1:
-the InternalRel of T is co-well_founded;
+  for x,y being Element of Class R, v,w being Element of M st x = Class(R,v) & y = Class(R,w) holds it.(x,y) = Class(R,v*w) if M is non empty otherwise it = {};
+  correctness
+  proof
+    A1: M is not empty implies ex b being BinOp of Class R st for x, y being Element of Class R, v,w being Element of M st x = Class(R,v) & y = Class(R,w) holds b.(x,y) = Class(R,v*w)
+  end;
 end;
 registration
-cluster -> Noetherian for 1-element RelStr;
 coherence
 proof
-let S be 1-element RelStr;
 let Y be set;
-set R = the InternalRel of S;
-assume
-A1: Y c= field R;
-assume Y <> {};
-then reconsider X = Y as non empty set;
-set a = the Element of X;
-take a;
-thus a in Y;
 end;
 end;

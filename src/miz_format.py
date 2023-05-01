@@ -205,9 +205,9 @@ def format_body_part(body_part_token_lines):
     output_lines = []
     for indentation_width, line in zip(indentation_widths, space_adjusted_lines):
         line = f"{' ' * indentation_width}{line}"
-        # TODO: ここで split_lines_at_max_length を呼び出す
-        # output_lines.extend(split_line_at_max_length(line, indentation_width))
-        output_lines.append(line)
+        output_lines.extend(split_line_at_max_length(line, indentation_width))
+
+    return output_lines
 
 
 # TODO: 1行のテキストを入力とし、指定された最大文字数を超える場合、最大文字数以内で分割されたテキスト配列を返す
