@@ -187,12 +187,14 @@ def format_env_part(env_part_token_lines):
     output_lines = []
     for indentation_width, line in zip(indentation_widths, space_adjusted_lines):
         line = f"{' ' * indentation_width}{line}"
-        # TODO: ここで split_lines_at_max_length を呼び出す
-        # if 開始文字 in ENV_DIRECTIVE_KEYWORDS:
-        # output_lines.extend(split_line_at_max_length(line, option.ENVIRON_LINE_INDENTATION_WIDTH))
-        # else
-        # output_lines.append(line)
-        output_lines.append(line)
+        if line.split() and line.split()[0] in option.ENV_DIRECTIVE_KEYWORDS:
+            output_lines.extend(
+                split_line_at_max_length(line, option.ENVIRON_LINE_INDENTATION_WIDTH)
+            )
+        else:
+            output_lines.append(line)
+
+    return output_lines
 
 
 def format_body_part(body_part_token_lines):
@@ -208,14 +210,17 @@ def format_body_part(body_part_token_lines):
         output_lines.append(line)
 
 
-# TODO: 各行が最大文字数を超えているかどうかを判定する
-def is_exceeded_max_line_length(line):
-    pass
-
-
-# TODO: テキストを入力とし、指定された最大文字数を超える場合、最大文字数以内で分割する
+# TODO: 1行のテキストを入力とし、指定された最大文字数を超える場合、最大文字数以内で分割されたテキスト配列を返す
 def split_line_at_max_length(line, indentation_width):
-    pass
+    lines = []
+    while len(line) >= option.MAX_LINE_LENGTH:
+        split_blank_pos = line.rfind(" ", 0, option.MAX_LINE_LENGTH)
+        lines.append(line[:split_blank_pos])
+        # 2行目以降はインデントのスペース数を考慮する
+        line = f"{' ' * indentation_width}{line[split_blank_pos + 1:]}"
+
+    lines.append(line)
+    return lines
 
 
 def split_env_part_token_lines_into_sentences(env_part_token_lines) -> list[list]:

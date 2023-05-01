@@ -303,7 +303,35 @@ def test_find_first_no_empty_array_i():
 #     assert result == expected
 
 
+# def test_split_line_at_max_length():
+#     line = "  for Y being set st Y c= field R & Y <> {} ex a being object st a in Y & for b being object st b in Y & a <> b holds not [a,b] in R; let A be non empty Subset of T;"
+#     indentation_width = 4
+#     assert (split_line_at_max_length(line, indentation_width)) == [
+#         "  for Y being set st Y c= field R & Y <> {} ex a being object st a in Y & for b",
+#         "    being object st b in Y & a <> b holds not [a,b] in R; let A be non empty",
+#         "    Subset of T;",
+#     ]
+
+
 # TODO: テストを追加
-def test_format_body_part():
-    format_body_part(generate_token_lines(body_part_token_table))
-    format_env_part(generate_token_lines(env_part_token_table))
+def test_format_env_part():
+    assert(format_env_part(generate_token_lines(env_part_token_table))) == [
+        ":: Fan Homeomorphisms in the Plane",
+        "::  by Yatsuka Nakamura",
+        "",
+        "environ",
+        "",
+        " vocabularies NUMBERS, PRE_TOPC, FUNCT_4, SUPINF_2, COMPLEX1, XXREAL_0,",
+        "      ORDINAL2, XBOOLE_0, FUNCT_1, TOPMETR, SUBSET_1, ORDINAL2, RCOMP_1,",
+        "      RCOMP_2;",
+        " notations TARSKI, XBOOLE_0, SUBSET_1, ORDINAL1, NUMBERS, XCMPLX_0, XREAL_0,",
+        "      STRUCT_0, PARTFUN1, TOPMETR, RLVECT_1, EUCLID, FUNCT_4, PRE_TOPC,",
+        "      RLTOPSP1;",
+        " constructors FUNCT_4, REAL_1, SQUARE_1, BINOP_2, COMPLEX1, TOPS_2, COMPTS_1,",
+        "      TBSP_1, TOPMETR, PSCOMP_1, FUNCSDOM, PCOMPS_1;"
+    ]
+    
+
+# TODO: テストを追加
+# def test_format_body_part():
+#     format_body_part(generate_token_lines(body_part_token_table))
