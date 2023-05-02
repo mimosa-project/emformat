@@ -6,11 +6,7 @@ import logging
 import itertools
 
 
-from py_miz_controller import (
-    MizController,
-    TokenType,
-    KeywordType,
-)
+from py_miz_controller import MizController, TokenType, KeywordType, IdentifierType
 
 
 def main(argv):
@@ -168,7 +164,6 @@ def convert_token_lines_to_texts(token_lines):
 
 
 def format(token_table):
-    # TODO: generate_token_lines の中で、特定のキーワードの前後に改行を入れる処理を呼び出す
     token_lines = generate_token_lines(token_table)
     env_part_token_lines, body_part_token_lines = split_into_env_and_body_part(token_lines)
     env_part_lines = format_env_part(env_part_token_lines)
@@ -353,8 +348,64 @@ def determine_body_part_indentation_widths(body_part_token_lines):
 
 
 # TODO: 特定のキーワードの前後で改行を挿入する
-def adjust_newline_position(token_by_lines):
-    pass
+def adjust_newline_position(token_lines):
+    output_token_lines = []
+    for tokens in token_lines:
+        if len(tokens) == 0:
+            output_token_lines.append([])
+            continue
+
+        current_line_tokens = []
+        for current_pos in range(len(tokens)):
+            # 現在のトークンの直前で改行する場合、1つ前の行を確定する
+            if (
+                tokens[current_pos].text in option.BLOCK_KEYWORDS
+                or tokens[current_pos].text == ".="
+            ):
+                # ".=" or ブロック開始キーワード
+                if len(current_line_tokens) != 0:
+                    output_token_lines.append(current_line_tokens)
+                    current_line_tokens = []
+            elif (
+                tokens[current_pos].text == ":"
+                and tokens[current_pos - 2].text not in [":", "theorem"]
+                and tokens[current_pos - 1].token_type == TokenType.IDENTIFIER
+                and tokens[current_pos - 1].identifier_type == IdentifierType.LABEL
+            ):
+                # LABEL: (":LABEL:", "theorem LABEL:" のパターンは除外)
+                prev_token = current_line_tokens.pop()
+                if len(current_line_tokens) != 0:
+                    output_token_lines.append(current_line_tokens)
+                current_line_tokens = [prev_token]
+
+            current_line_tokens.append(tokens[current_pos])
+
+            # 現在のトークンの直後で改行する場合、現在の行を確定する
+            if (
+                tokens[current_pos].text == ";"
+                or (
+                    tokens[current_pos].text == ":"
+                    and current_line_tokens[0].text in ["theorem", "scheme"]
+                )
+                or (
+                    tokens[current_pos].text in option.BLOCK_KEYWORDS
+                    and not (
+                        tokens[current_pos].text == "scheme"
+                        or (
+                            tokens[current_pos].text == "theorem"
+                            and tokens[current_pos + 1].token_type == TokenType.IDENTIFIER
+                            and tokens[current_pos + 1].identifier_type == IdentifierType.LABEL
+                        )
+                    )
+                )
+            ):
+                # ";"
+                # "theorem LABEL:", "scheme Scheme-Identifier { Scheme-Parameters }:" の直後
+                # "theorem LABEL:", "scheme" を除く、ブロック開始キーワード直後
+                output_token_lines.append(current_line_tokens)
+                current_line_tokens = []
+
+    return output_token_lines
 
 
 def split_into_env_and_body_part(token_lines):

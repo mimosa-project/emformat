@@ -48,6 +48,10 @@ body_part_miz_controller = MizController()
 body_part_miz_controller.exec_file(f"{TEST_DIR}/data/body_part.miz", f"{TEST_DIR}/data/mml.vct")
 body_part_token_table = body_part_miz_controller.token_table
 
+newline_miz_controller = MizController()
+newline_miz_controller.exec_file(f"{TEST_DIR}/data/newline.miz", f"{TEST_DIR}/data/mml.vct")
+newline_token_table = newline_miz_controller.token_table
+
 
 def test_cut_center_space_format_is_valid1():
     cut_center_space_value = 100
@@ -334,7 +338,7 @@ def test_format_env_part():
 
 # TODO: mizcoreのis_separatableが実装されたら修正する
 def test_format_body_part():
-    assert(format_body_part(generate_token_lines(body_part_token_table))) == [
+    assert (format_body_part(generate_token_lines(body_part_token_table))) == [
         "begin :: Semilattice of type widening",
         "",
         "definition",
@@ -354,5 +358,30 @@ def test_format_body_part():
         "  proof",
         "    let Y be set;",
         "  end;",
-        "end;"
+        "end;",
+    ]
+
+
+def test_adjust_newline_position():
+    assert (
+        convert_token_lines_to_texts(
+            adjust_newline_position(generate_token_lines(newline_token_table))
+        )
+    ) == [
+        ["definition"],
+        ["aaa", ";"],
+        ["bbb", ":", "Def4", ":", "ccc", ";"],
+        ["end", ";"],
+        ["theorem"],
+        ["ddd"],
+        ["proof"],
+        ["A1", ":"],
+        ["now"],
+        ["eee", ";"],
+        ["end", ";"],
+        ["end", ";"],
+        ["theorem", "Th1", ":"],
+        ["fff", ";"],
+        ["scheme", "ddd", "{", "P", "[", "set", "]", "}", ":"],
+        ["end", ";"],
     ]
