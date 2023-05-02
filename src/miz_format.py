@@ -205,7 +205,7 @@ def format_body_part(body_part_token_lines):
     return output_lines
 
 
-# TODO: 1行のテキストを入力とし、指定された最大文字数を超える場合、最大文字数以内で分割されたテキスト配列を返す
+# 1行のテキストを入力とし、指定された最大文字数を超える場合、最大文字数以内で分割されたテキスト配列を返す
 def split_line_at_max_length(line, indentation_width):
     lines = []
     while len(line) >= option.MAX_LINE_LENGTH:
@@ -347,7 +347,7 @@ def determine_body_part_indentation_widths(body_part_token_lines):
     return indentation_widths
 
 
-# TODO: 特定のキーワードの前後で改行を挿入する
+# 特定のキーワードの前後で改行を挿入する
 def adjust_newline_position(token_lines):
     output_token_lines = []
     for tokens in token_lines:
@@ -359,10 +359,12 @@ def adjust_newline_position(token_lines):
         for current_pos in range(len(tokens)):
             # 現在のトークンの直前で改行する場合、1つ前の行を確定する
             if (
-                tokens[current_pos].text in option.BLOCK_KEYWORDS
-                or tokens[current_pos].text == ".="
+                tokens[current_pos].text == ".="
+                or tokens[current_pos].text in ["environ", "begin"]
+                or tokens[current_pos].text in option.BLOCK_KEYWORDS
+                or tokens[current_pos].text in option.ENV_DIRECTIVE_KEYWORDS
             ):
-                # ".=" or ブロック開始キーワード
+                # ".=", "environ", "begin" or ブロック開始キーワード or Directive開始キーワード
                 if len(current_line_tokens) != 0:
                     output_token_lines.append(current_line_tokens)
                     current_line_tokens = []
@@ -383,6 +385,7 @@ def adjust_newline_position(token_lines):
             # 現在のトークンの直後で改行する場合、現在の行を確定する
             if (
                 tokens[current_pos].text == ";"
+                or tokens[current_pos].text in ["environ", "begin"]
                 or (
                     tokens[current_pos].text == ":"
                     and current_line_tokens[0].text in ["theorem", "scheme"]
@@ -399,7 +402,7 @@ def adjust_newline_position(token_lines):
                     )
                 )
             ):
-                # ";"
+                # ";", "environ", "begin"
                 # "theorem LABEL:", "scheme Scheme-Identifier { Scheme-Parameters }:" の直後
                 # "theorem LABEL:", "scheme" を除く、ブロック開始キーワード直後
                 output_token_lines.append(current_line_tokens)
