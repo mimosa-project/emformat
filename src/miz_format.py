@@ -209,6 +209,9 @@ def format_body_part(body_part_token_lines):
 def split_line_at_max_length(line, indentation_width):
     lines = []
     while len(line) >= option.MAX_LINE_LENGTH:
+        # 例外として、コメント文の途中では改行しないようにする
+        if 0 < line.find("::") < option.MAX_LINE_LENGTH:
+            break
         split_blank_pos = line.rfind(" ", 0, option.MAX_LINE_LENGTH)
         lines.append(line[:split_blank_pos])
         # 2行目以降はインデントのスペース数を考慮する

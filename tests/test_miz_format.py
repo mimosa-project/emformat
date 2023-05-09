@@ -339,7 +339,7 @@ def test_format_env_part():
 # TODO: mizcoreのis_separatableが実装されたら修正する
 def test_format_body_part():
     assert (format_body_part(generate_token_lines(body_part_token_table))) == [
-        "begin :: Semilattice of type widening",
+        "begin :: Semilattice of type widening Semilattice of type widening Semilattice of type widening",
         "",
         "definition",
         "  for x, y being Element of Class R, v, w being Element of M st x = Class (R,",
