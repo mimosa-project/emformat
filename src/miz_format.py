@@ -360,6 +360,14 @@ def adjust_newline_position(token_lines):
 
         current_line_tokens = []
         for current_pos in range(len(tokens)):
+            # 前行に続くコメント文の場合、直前で分割しない
+            if (
+                tokens[current_pos].token_type == TokenType.COMMENT
+                and current_pos > 0
+            ):
+                output_token_lines[-1].append(tokens[current_pos])
+                break
+
             # 現在のトークンの直前で改行する場合、1つ前の行を確定する
             if (
                 tokens[current_pos].text == ".="
@@ -410,6 +418,9 @@ def adjust_newline_position(token_lines):
                 # "theorem LABEL:", "scheme" を除く、ブロック開始キーワード直後
                 output_token_lines.append(current_line_tokens)
                 current_line_tokens = []
+
+        if len(current_line_tokens) > 0:
+            output_token_lines.append(current_line_tokens)
 
     return output_token_lines
 

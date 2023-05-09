@@ -368,7 +368,7 @@ def test_adjust_newline_position():
             adjust_newline_position(generate_token_lines(newline_token_table))
         )
     ) == [
-        ["environ"],
+        ["environ", ":: comment"],
         ["constructors", "NUMBERS", ";"],
         ["registrations", "XBOOLE_0", ";"],
         ["begin"],
@@ -388,4 +388,8 @@ def test_adjust_newline_position():
         ["fff", ";"],
         ["scheme", "ddd", "{", "P", "[", "set", "]", "}", ":"],
         ["end", ";"],
+        ["definition"],
+        ["let", "n"],
+        ["be", "Nat", ";"],
+        ["end",";"]
     ]
