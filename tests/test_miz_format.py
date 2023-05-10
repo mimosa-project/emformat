@@ -107,45 +107,45 @@ def test_determine_space_omissio2():
 
 def test_generate_space_adjusted_line1():
     assert (
-        generate_space_adjusted_line(generate_token_lines(token_table)[384])
+        convert_tokens_to_text(generate_token_lines(token_table)[384])
     ) == "then g5 . p = (r1 / r2 - a) / b by A11, A18;"
 
 
 def test_generate_space_adjusted_line2():
     assert (
-        generate_space_adjusted_line(generate_token_lines(token_table)[64])
+        convert_tokens_to_text(generate_token_lines(token_table)[64])
     ) == "{r where r is Real: r > a} c= the carrier of R^1"
 
 
 def test_generate_space_adjusted_line3():
     assert (
-        generate_space_adjusted_line(generate_token_lines(token_table)[1700])
+        convert_tokens_to_text(generate_token_lines(token_table)[1700])
     ) == "defpred Q [Point of TOP-REAL 2] means $1 `1 <= 0;"
 
 
 def test_generate_space_adjusted_line4():
-    assert (generate_space_adjusted_line(generate_token_lines(token_table)[596])) == ":Def1:"
+    assert (convert_tokens_to_text(generate_token_lines(token_table)[596])) == ":Def1:"
 
 
 def test_generate_space_adjusted_line5():
     assert (
-        generate_space_adjusted_line(generate_token_lines(token_table)[174])
+        convert_tokens_to_text(generate_token_lines(token_table)[174])
     ) == "A7: K = f .: K and"
 
 
 def test_generate_space_adjusted_line6():
-    assert (generate_space_adjusted_line(generate_token_lines(token_table)[54])) == "theorem Th1:"
+    assert (convert_tokens_to_text(generate_token_lines(token_table)[54])) == "theorem Th1:"
 
 
 def test_generate_space_adjusted_line7():
     assert (
-        generate_space_adjusted_line(generate_token_lines(token_table)[70])
+        convert_tokens_to_text(generate_token_lines(token_table)[70])
     ) == "r in REAL by XREAL_0:def 1;"
 
 
 # def test_generate_space_adjusted_line8():
 #     assert (
-#         generate_space_adjusted_line(generate_token_lines(token_table2)[47])
+#         convert_tokens_to_text(generate_token_lines(token_table2)[47])
 #     ) == "scheme Replacement {A() -> set, P[object, object]}:"
 
 
@@ -156,7 +156,7 @@ def test_split_into_env_and_body_part():
 
 def test_token_texts():
     tokens = generate_token_lines(token_table)[44]
-    assert (convert_tokens_to_texts(tokens)) == ["reserve", "a", "for", "Real", ";"]
+    assert (convert_tokens_to_text_arrays(tokens)) == ["reserve", "a", "for", "Real", ";"]
 
 
 # Theoremブロック(Proof) を含む場合
@@ -267,7 +267,7 @@ def test_determine_body_part_indentation_widths5(caplog):
 
 
 def test_split_env_part_tokens_into_sentences():
-    result = convert_token_lines_to_texts(
+    result = convert_token_lines_to_text_array(
         split_env_part_token_lines_into_sentences(generate_token_lines(env_part_token_table))
     )
     expected = []
@@ -301,7 +301,7 @@ def test_find_first_no_empty_array_i():
 # def test_normalize_blank_line():
 #     with open(f"{TEST_DIR}/expected/blank_line.miz") as f:
 #         expected = f.read().split("\n")
-#     result = generate_space_adjusted_lines(
+#     result = convert_token_lines_to_texts(
 #         normalize_blank_line(generate_token_lines(blank_line_token_table))
 #     )
 #     assert result == expected
@@ -364,7 +364,7 @@ def test_format_body_part():
 
 def test_adjust_newline_position():
     assert (
-        convert_token_lines_to_texts(
+        convert_token_lines_to_text_array(
             adjust_newline_position(generate_token_lines(newline_token_table))
         )
     ) == [
@@ -391,5 +391,5 @@ def test_adjust_newline_position():
         ["definition"],
         ["let", "n"],
         ["be", "Nat", ";"],
-        ["end",";"]
+        ["end", ";"],
     ]

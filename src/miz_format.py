@@ -131,7 +131,7 @@ def separable_tokens_list(tokens):
     return separable_tokens_list
 
 
-def generate_space_adjusted_line(tokens):
+def convert_tokens_to_text(tokens):
     output_line = ""
     no_space_tokens_list = determine_space_omission(tokens)
 
@@ -141,24 +141,24 @@ def generate_space_adjusted_line(tokens):
     return output_line.lstrip()
 
 
-def generate_space_adjusted_lines(token_lines):
+def convert_token_lines_to_texts(token_lines):
     output_lines = []
 
     for tokens in token_lines:
-        output_lines.append(generate_space_adjusted_line(tokens))
+        output_lines.append(convert_tokens_to_text(tokens))
     return output_lines
 
 
-def convert_tokens_to_texts(tokens):
+def convert_tokens_to_text_arrays(tokens):
     if tokens == []:
         return []
     return [token.text for token in tokens]
 
 
-def convert_token_lines_to_texts(token_lines):
+def convert_token_lines_to_text_array(token_lines):
     texts = []
     for tokens in token_lines:
-        texts.append(convert_tokens_to_texts(tokens))
+        texts.append(convert_tokens_to_text_arrays(tokens))
 
     return texts
 
@@ -177,7 +177,7 @@ def format_env_part(env_part_token_lines):
         split_env_part_token_lines_into_sentences(env_part_token_lines)
     )
     indentation_widths = determine_env_part_indentation_widths(normalized_token_lines)
-    space_adjusted_lines = generate_space_adjusted_lines(normalized_token_lines)
+    space_adjusted_lines = convert_token_lines_to_texts(normalized_token_lines)
 
     output_lines = []
     for indentation_width, line in zip(indentation_widths, space_adjusted_lines):
@@ -195,7 +195,7 @@ def format_env_part(env_part_token_lines):
 def format_body_part(body_part_token_lines):
     normalized_token_lines = normalize_blank_line(body_part_token_lines)
     indentation_widths = determine_body_part_indentation_widths(normalized_token_lines)
-    space_adjusted_lines = generate_space_adjusted_lines(normalized_token_lines)
+    space_adjusted_lines = convert_token_lines_to_texts(normalized_token_lines)
 
     output_lines = []
     for indentation_width, line in zip(indentation_widths, space_adjusted_lines):
@@ -332,7 +332,7 @@ def determine_body_part_indentation_widths(body_part_token_lines):
             current_block_level = 1
         elif current_block_type == "theorem":
             if (first_token_text == "end" and current_block_level == 1) or (
-                is_top_level_proof and ";" in convert_tokens_to_texts(tokens)
+                is_top_level_proof and ";" in convert_tokens_to_text_arrays(tokens)
             ):
                 current_block_type = ""
                 current_block_level = 0
@@ -361,10 +361,7 @@ def adjust_newline_position(token_lines):
         current_line_tokens = []
         for current_pos in range(len(tokens)):
             # 前行に続くコメント文の場合、直前で分割しない
-            if (
-                tokens[current_pos].token_type == TokenType.COMMENT
-                and current_pos > 0
-            ):
+            if tokens[current_pos].token_type == TokenType.COMMENT and current_pos > 0:
                 output_token_lines[-1].append(tokens[current_pos])
                 break
 
