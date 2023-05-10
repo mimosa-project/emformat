@@ -206,10 +206,10 @@ def format_body_part(body_part_token_lines):
 
 
 # 1行のテキストを入力とし、指定された最大文字数を超える場合、最大文字数以内で分割されたテキスト配列を返す
+# 例外として、コメント文の場合、最大文字数を超えていても改行されない
 def split_line_at_max_length(line, indentation_width):
     lines = []
     while len(line) >= option.MAX_LINE_LENGTH:
-        # 例外として、コメント文の途中では改行しないようにする
         if 0 < line.find("::") < option.MAX_LINE_LENGTH:
             break
         split_blank_pos = line.rfind(" ", 0, option.MAX_LINE_LENGTH)
@@ -221,8 +221,9 @@ def split_line_at_max_length(line, indentation_width):
     return lines
 
 
+# Directiveについて、1文が1行となるように連結する
 def split_env_part_token_lines_into_sentences(env_part_token_lines) -> list[list]:
-    # 1次元のトークン列に変換する。この時改行を維持するため空文字列で表現する。
+    # 改行を維持するため空文字列で表現する
     tokens = list(
         itertools.chain.from_iterable(
             [tokens if len(tokens) != 0 else [""] for tokens in env_part_token_lines]
@@ -382,7 +383,7 @@ def adjust_newline_position(token_lines):
                 and tokens[current_pos - 1].token_type == TokenType.IDENTIFIER
                 and tokens[current_pos - 1].identifier_type == IdentifierType.LABEL
             ):
-                # LABEL: (":LABEL:", "theorem LABEL:" のパターンは除外)
+                # "LABEL:"のパターンを抽出 (":LABEL:", "theorem LABEL:" のパターンは除外)
                 prev_token = current_line_tokens.pop()
                 if len(current_line_tokens) != 0:
                     output_token_lines.append(current_line_tokens)
