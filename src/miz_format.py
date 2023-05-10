@@ -174,7 +174,7 @@ def format(token_table):
 def format_env_part(env_part_token_lines):
     # 元の改行位置は無視して一度文単位に変換する
     normalized_token_lines = normalize_blank_line(
-        split_env_part_token_lines_into_sentences(env_part_token_lines)
+        (split_env_part_token_lines_into_sentences(adjust_newline_position(env_part_token_lines)))
     )
     indentation_widths = determine_env_part_indentation_widths(normalized_token_lines)
     space_adjusted_lines = convert_token_lines_to_texts(normalized_token_lines)
@@ -193,7 +193,7 @@ def format_env_part(env_part_token_lines):
 
 
 def format_body_part(body_part_token_lines):
-    normalized_token_lines = normalize_blank_line(body_part_token_lines)
+    normalized_token_lines = normalize_blank_line(adjust_newline_position(body_part_token_lines))
     indentation_widths = determine_body_part_indentation_widths(normalized_token_lines)
     space_adjusted_lines = convert_token_lines_to_texts(normalized_token_lines)
 
@@ -273,7 +273,6 @@ def determine_body_part_indentation_widths(body_part_token_lines):
     is_top_level_proof = False
 
     # インデントの決定の目標となるキーワードは、必ず行頭に出現することを前提としている
-    # adjust_newline_position で実装
     for tokens in body_part_token_lines:
         if tokens == []:
             indentation_widths.append(0)
