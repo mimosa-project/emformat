@@ -4,9 +4,10 @@ import json
 import utils.option as option
 import logging
 import itertools
+from typing import Any
 
 
-from py_miz_controller import MizController, TokenType, KeywordType, IdentifierType
+from py_miz_controller import MizController, TokenType, KeywordType, IdentifierType, ASTToken
 
 
 def main(argv):
@@ -42,7 +43,7 @@ def output(output_lines):
         f.writelines([f"{line}\n" for line in output_lines])
 
 
-def cut_center_space_format_is_valid(cut_center_space_value):
+def cut_center_space_format_is_valid(cut_center_space_value: Any) -> bool:
     if not (isinstance(cut_center_space_value, dict)):
         return False
 
@@ -54,7 +55,7 @@ def cut_center_space_format_is_valid(cut_center_space_value):
 
 
 # token.identifier_type = IdentifierType.LABEL の場合、"__label" を返す
-def convert_to_token_representative_name(token):
+def convert_to_token_representative_name(token: ASTToken) -> str:
     if token.token_type == TokenType.IDENTIFIER:
         identifier_type = str(token.identifier_type)
         return f"__{identifier_type[identifier_type.index('.')+1:].lower()}"
@@ -62,9 +63,9 @@ def convert_to_token_representative_name(token):
         return token.text
 
 
-def generate_token_lines(token_table):
+def generate_token_lines(token_table) -> list[list[ASTToken]]:
     last_line_number = token_table.last_token.line_number
-    token_lines = [[] for _ in range(last_line_number)]
+    token_lines: list[list] = [[] for _ in range(last_line_number)]
 
     for i in range(token_table.token_num):
         token = token_table.token(i)
@@ -79,7 +80,7 @@ def is_separable_tokens(tokens):
     return True
 
 
-def determine_space_omission(tokens):
+def determine_space_omission(tokens: list[ASTToken]) -> list[list[ASTToken]]:
     no_space_tokens_list = []
     no_space_tokens = []
 
@@ -112,7 +113,7 @@ def determine_space_omission(tokens):
     return no_space_tokens_list
 
 
-def separable_tokens_list(tokens):
+def separable_tokens_list(tokens: list[ASTToken]) -> list[list[ASTToken]]:
     separable_tokens_list = []
     begin_pos = 0
     end_pos = len(tokens)
@@ -131,7 +132,7 @@ def separable_tokens_list(tokens):
     return separable_tokens_list
 
 
-def convert_tokens_to_text(tokens):
+def convert_tokens_to_text(tokens: list[ASTToken]) -> str:
     output_line = ""
     no_space_tokens_list = determine_space_omission(tokens)
 
@@ -141,7 +142,7 @@ def convert_tokens_to_text(tokens):
     return output_line.lstrip()
 
 
-def convert_token_lines_to_texts(token_lines):
+def convert_token_lines_to_texts(token_lines: list[list[ASTToken]]) -> list[str]:
     output_lines = []
 
     for tokens in token_lines:
@@ -149,13 +150,13 @@ def convert_token_lines_to_texts(token_lines):
     return output_lines
 
 
-def convert_tokens_to_text_arrays(tokens):
+def convert_tokens_to_text_arrays(tokens: list[ASTToken]) -> list[str]:
     if tokens == []:
         return []
     return [token.text for token in tokens]
 
 
-def convert_token_lines_to_text_array(token_lines):
+def convert_token_lines_to_text_array(token_lines: list[list[ASTToken]]) -> list[list[str]]:
     texts = []
     for tokens in token_lines:
         texts.append(convert_tokens_to_text_arrays(tokens))
@@ -163,7 +164,7 @@ def convert_token_lines_to_text_array(token_lines):
     return texts
 
 
-def format(token_table):
+def format(token_table) -> list[str]:
     token_lines = generate_token_lines(token_table)
     env_part_token_lines, body_part_token_lines = split_into_env_and_body_part(token_lines)
     env_part_lines = format_env_part(env_part_token_lines)
@@ -171,7 +172,7 @@ def format(token_table):
     return env_part_lines + body_part_lines
 
 
-def format_env_part(env_part_token_lines):
+def format_env_part(env_part_token_lines: list[list[ASTToken]]) -> list[str]:
     # 元の改行位置は無視して一度文単位に変換する
     normalized_token_lines = normalize_blank_line(
         (split_env_part_token_lines_into_sentences(adjust_newline_position(env_part_token_lines)))
@@ -192,7 +193,7 @@ def format_env_part(env_part_token_lines):
     return output_lines
 
 
-def format_body_part(body_part_token_lines):
+def format_body_part(body_part_token_lines: list[list[ASTToken]]) -> list[str]:
     normalized_token_lines = normalize_blank_line(adjust_newline_position(body_part_token_lines))
     indentation_widths = determine_body_part_indentation_widths(normalized_token_lines)
     space_adjusted_lines = convert_token_lines_to_texts(normalized_token_lines)
@@ -207,7 +208,7 @@ def format_body_part(body_part_token_lines):
 
 # 1行のテキストを入力とし、指定された最大文字数を超える場合、最大文字数以内で分割されたテキスト配列を返す
 # 例外として、コメント文の場合、最大文字数を超えていても改行されない
-def split_line_at_max_length(line, indentation_width):
+def split_line_at_max_length(line: str, indentation_width: int) -> list[str]:
     lines = []
     while len(line) >= option.MAX_LINE_LENGTH:
         if 0 < line.find("::") < option.MAX_LINE_LENGTH:
@@ -222,7 +223,9 @@ def split_line_at_max_length(line, indentation_width):
 
 
 # Directiveについて、1文が1行となるように連結する
-def split_env_part_token_lines_into_sentences(env_part_token_lines) -> list[list]:
+def split_env_part_token_lines_into_sentences(
+    env_part_token_lines: list[list[ASTToken]],
+) -> list[list[ASTToken]]:
     # 改行を維持するため空文字列で表現する
     tokens = list(
         itertools.chain.from_iterable(
@@ -230,7 +233,7 @@ def split_env_part_token_lines_into_sentences(env_part_token_lines) -> list[list
         )
     )
 
-    token_sentences = []
+    token_sentences: list[list[ASTToken]] = []
     current_sentence_tokens = []
     for token in tokens:
         if token == "":
@@ -247,7 +250,7 @@ def split_env_part_token_lines_into_sentences(env_part_token_lines) -> list[list
     return token_sentences
 
 
-def determine_env_part_indentation_widths(env_part_token_lines):
+def determine_env_part_indentation_widths(env_part_token_lines: list[list[ASTToken]]) -> list[int]:
     indentation_widths = []
 
     for tokens in env_part_token_lines:
@@ -264,7 +267,9 @@ def determine_env_part_indentation_widths(env_part_token_lines):
     return indentation_widths
 
 
-def determine_body_part_indentation_widths(body_part_token_lines):
+def determine_body_part_indentation_widths(
+    body_part_token_lines: list[list[ASTToken]],
+) -> list[int]:
     indentation_widths = []
     current_indentation_level = 0
     current_block_level = 0
@@ -351,14 +356,14 @@ def determine_body_part_indentation_widths(body_part_token_lines):
 
 
 # 特定のキーワードの前後で改行を挿入する
-def adjust_newline_position(token_lines):
-    output_token_lines = []
+def adjust_newline_position(token_lines: list[list[ASTToken]]) -> list[list[ASTToken]]:
+    output_token_lines: list[list[ASTToken]] = []
     for tokens in token_lines:
         if len(tokens) == 0:
             output_token_lines.append([])
             continue
 
-        current_line_tokens = []
+        current_line_tokens: list[ASTToken] = []
         for current_pos in range(len(tokens)):
             # 前行に続くコメント文の場合、直前で分割しない
             if tokens[current_pos].token_type == TokenType.COMMENT and current_pos > 0:
@@ -422,7 +427,9 @@ def adjust_newline_position(token_lines):
     return output_token_lines
 
 
-def split_into_env_and_body_part(token_lines):
+def split_into_env_and_body_part(
+    token_lines: list[list[ASTToken]],
+) -> tuple[list[list[ASTToken]], list[list[ASTToken]]]:
     for current_line_number, tokens in enumerate(token_lines):
         if tokens == []:
             continue
@@ -435,7 +442,7 @@ def split_into_env_and_body_part(token_lines):
             return token_lines[:current_line_number], token_lines[current_line_number:]
 
 
-def normalize_blank_line(token_lines):
+def normalize_blank_line(token_lines: list[list[ASTToken]]) -> list[list[ASTToken]]:
     output_token_lines = []
 
     # 空行の挿入
@@ -462,7 +469,7 @@ def normalize_blank_line(token_lines):
     return remove_consecutive_value(output_token_lines[first_no_empty_array_i:], value=[])
 
 
-def count_comment_lines_before(token_lines, target_line):
+def count_comment_lines_before(token_lines: list[list[ASTToken]], target_line: int) -> int:
     comment_line_number = 0
     for line in reversed(range(target_line)):
         if token_lines[line] == []:
@@ -477,13 +484,13 @@ def count_comment_lines_before(token_lines, target_line):
     return comment_line_number
 
 
-def remove_consecutive_value(array, value):
+def remove_consecutive_value(array, value) -> list[Any]:
     output = [array[0]]
     output.extend([j for i, j in zip(array, array[1:]) if j != value or i != j])
     return output
 
 
-def find_first_no_empty_array_i(array):
+def find_first_no_empty_array_i(array) -> int:
     for i, elm in enumerate(array):
         if elm != []:
             return i
