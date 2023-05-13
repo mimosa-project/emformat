@@ -128,9 +128,7 @@ def test_generate_space_adjusted_line4():
 
 
 def test_generate_space_adjusted_line5():
-    assert (
-        convert_tokens_to_text(generate_token_lines(token_table)[174])
-    ) == "A7: K = f .: K and"
+    assert (convert_tokens_to_text(generate_token_lines(token_table)[174])) == "A7: K = f .: K and"
 
 
 def test_generate_space_adjusted_line6():
@@ -156,7 +154,7 @@ def test_split_into_env_and_body_part():
 
 def test_token_texts():
     tokens = generate_token_lines(token_table)[44]
-    assert (convert_tokens_to_text_arrays(tokens)) == ["reserve", "a", "for", "Real", ";"]
+    assert (convert_tokens_to_text_array(tokens)) == ["reserve", "a", "for", "Real", ";"]
 
 
 # Theoremブロック(Proof) を含む場合
@@ -267,7 +265,7 @@ def test_determine_body_part_indentation_widths5(caplog):
 
 
 def test_split_env_part_tokens_into_sentences():
-    result = convert_token_lines_to_text_array(
+    result = convert_token_lines_to_text_arrays(
         split_env_part_token_lines_into_sentences(generate_token_lines(env_part_token_table))
     )
     expected = []
@@ -364,7 +362,7 @@ def test_format_body_part():
 
 def test_adjust_newline_position():
     assert (
-        convert_token_lines_to_text_array(
+        convert_token_lines_to_text_arrays(
             adjust_newline_position(generate_token_lines(newline_token_table))
         )
     ) == [

@@ -150,16 +150,16 @@ def convert_token_lines_to_texts(token_lines: list[list[ASTToken]]) -> list[str]
     return output_lines
 
 
-def convert_tokens_to_text_arrays(tokens: list[ASTToken]) -> list[str]:
+def convert_tokens_to_text_array(tokens: list[ASTToken]) -> list[str]:
     if tokens == []:
         return []
     return [token.text for token in tokens]
 
 
-def convert_token_lines_to_text_array(token_lines: list[list[ASTToken]]) -> list[list[str]]:
+def convert_token_lines_to_text_arrays(token_lines: list[list[ASTToken]]) -> list[list[str]]:
     texts = []
     for tokens in token_lines:
-        texts.append(convert_tokens_to_text_arrays(tokens))
+        texts.append(convert_tokens_to_text_array(tokens))
 
     return texts
 
@@ -337,7 +337,7 @@ def determine_body_part_indentation_widths(
             current_block_level = 1
         elif current_block_type == "theorem":
             if (first_token_text == "end" and current_block_level == 1) or (
-                is_top_level_proof and ";" in convert_tokens_to_text_arrays(tokens)
+                is_top_level_proof and ";" in convert_tokens_to_text_array(tokens)
             ):
                 current_block_type = ""
                 current_block_level = 0
