@@ -1,0 +1,14 @@
+begin :: Semilattice of type widening Semilattice of type widening Semilattice of type widening
+definition
+  for x,y being Element of Class R, v,w being Element of M st x = Class(R,v) & y = Class(R,w) holds it.(x,y) = Class(R,v*w) if M is non empty otherwise it = {};
+  correctness
+  proof
+    A1: M is not empty implies ex b being BinOp of Class R st for x, y being Element of Class R, v,w being Element of M st x = Class(R,v) & y = Class(R,w) holds b.(x,y) = Class(R,v*w)
+  end;
+end;
+registration
+coherence
+proof
+let Y be set;
+end;
+end;

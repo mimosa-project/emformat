@@ -1,28 +1,40 @@
 {
   "MAX_LINE_LENGTH": 80,
-  "INDENT_SIZE": 2,
-  "ALONE_KEYWORDS": [
+  "STANDARD_INDENTATION_WIDTH": 2,
+  "ENVIRON_DIRECTIVE_INDENTATION_WIDTH": 1,
+  "ENVIRON_LINE_INDENTATION_WIDTH": 6,
+  "ENV_DIRECTIVE_KEYWORDS": [
+    "vocabularies",
+    "notations",
+    "constructors",
+    "registrations",
+    "definitions",
+    "expansions",
+    "equalities",
+    "theorems",
+    "schemes",
+    "requirements"
+  ],
+  "BLOCK_KEYWORDS": [
     "definition",
     "registration",
     "notation",
+    "theorem",
     "scheme",
     "case",
     "suppose",
     "hereby",
     "now",
-    "proof",
-    "environ",
-    "begin",
-    "provided",
-    "existence",
-    "uniqueness",
-    "coherence",
-    "compatibility",
-    "consistency",
-    "reducibility",
-    "end"
+    "proof"
   ],
-  "USE_BEFORE_BLANK_LINE": [
+  "TOP_BLOCK_KEYWORDS": [
+    "definition",
+    "registration",
+    "notation",
+    "theorem",
+    "scheme"
+  ],
+  "KEYWORDS_INSERT_BLANK_LINE_BEFORE": [
     "definition",
     "registration",
     "notation",
@@ -31,7 +43,7 @@
     "begin",
     "environ"
   ],
-  "USE_AFTER_BLANK_LINE": [
+  "KEYWORDS_INSERT_BLANK_LINE_AFTER": [
     "begin",
     "environ"
   ],
