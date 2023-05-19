@@ -39,7 +39,7 @@ def load_settings():
 
 def output(output_lines):
     # with open(miz_path, "w") as f:
-    with open("data/result.miz", "w") as f:
+    with open("tests/data/result.miz", "w") as f:
         f.writelines([f"{line}\n" for line in output_lines])
 
 
