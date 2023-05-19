@@ -343,6 +343,7 @@ def determine_body_part_indentation_widths(
             ):
                 current_block_type = ""
                 current_block_level = 0
+                current_indentation_level = 0
 
         # Schemeブロックの開始/終了判定
         if first_token_text == "scheme":
@@ -352,7 +353,7 @@ def determine_body_part_indentation_widths(
         elif current_block_type == "scheme":
             if first_token_text == "end" and current_block_level == 0:
                 current_block_type = ""
-                current_block_level = 0
+                current_indentation_level = 0
 
     return indentation_widths
 
