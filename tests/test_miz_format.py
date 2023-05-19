@@ -64,6 +64,11 @@ def test_cut_center_space_format_is_valid2():
 
 
 def test_cut_center_space_format_is_valid3():
+    cut_center_space_value = {": __label": 1}
+    assert (cut_center_space_format_is_valid(cut_center_space_value)) == False
+
+
+def test_cut_center_space_format_is_valid4():
     cut_center_space_value = {": __label": True}
     assert (cut_center_space_format_is_valid(cut_center_space_value)) == True
 

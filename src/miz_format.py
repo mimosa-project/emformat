@@ -47,8 +47,10 @@ def cut_center_space_format_is_valid(cut_center_space_value: Any) -> bool:
     if not (isinstance(cut_center_space_value, dict)):
         return False
 
-    for key in cut_center_space_value:
+    for key, value in cut_center_space_value.items():
         if len(key.split()) != 2:
+            return False
+        if type(value) != bool:
             return False
 
     return True
