@@ -28,7 +28,7 @@ def load_settings():
             # CUT_CENTER_SPACE の場合、型チェックを行う
             if setting_key == "CUT_CENTER_SPACE":
                 if not cut_center_space_format_is_valid(setting_value):
-                    print("設定ファイルのCUT_CENTER_SPACEの値が不適切です。")
+                    logging.error("CUT_CENTER_SPACE value in setting file is invalid.")
                     sys.exit(1)
 
                 # 複合キーの型変換
@@ -47,8 +47,10 @@ def cut_center_space_format_is_valid(cut_center_space_value: Any) -> bool:
     if not (isinstance(cut_center_space_value, dict)):
         return False
 
-    for key in cut_center_space_value:
+    for key, value in cut_center_space_value.items():
         if len(key.split()) != 2:
+            return False
+        if type(value) != bool:
             return False
 
     return True
