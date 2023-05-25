@@ -208,12 +208,18 @@ def test_determine_body_part_indentation_widths1():
 
 # Theoremブロック(Simple-Justification)を含む場合
 def test_determine_body_part_indentation_widths2():
-    assert (determine_body_part_indentation_widths(generate_token_lines(token_table2)[30:35])) == [
+    assert (determine_body_part_indentation_widths(generate_token_lines(token_table2)[30:41])) == [
         0,
         2,
         2,
         2,
         0,
+        0,
+        0,
+        2,
+        2,
+        2,
+        2
     ]
 
 
