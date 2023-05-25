@@ -411,6 +411,7 @@ def adjust_newline_position(token_lines: list[list[ASTToken]]) -> list[list[ASTT
                         tokens[current_pos].text == "scheme"
                         or (
                             tokens[current_pos].text == "theorem"
+                            and current_pos < len(tokens) - 1
                             and tokens[current_pos + 1].token_type == TokenType.IDENTIFIER
                             and tokens[current_pos + 1].identifier_type == IdentifierType.LABEL
                         )
