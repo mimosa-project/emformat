@@ -95,6 +95,7 @@ def determine_space_omission(tokens: list[ASTToken]) -> list[list[ASTToken]]:
     no_space_tokens = []
 
     for current_pos in range(len(tokens)):
+        # TODO: ここでラベルチェック+置換
         token_text = tokens[current_pos].text
 
         if current_pos == 0:
