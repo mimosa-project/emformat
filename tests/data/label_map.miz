@@ -44,3 +44,30 @@ definition
   for t being type of T for a being
   adjective of T st a in adjs t holds not non-a in adjs t;
 end;
+
+:: scheme FuncRecursiveUniqu2
+::   { X() -> non empty set, F(XFinSequence of X()) -> Element of X(),
+::     F1,F2() -> sequence of  X()}:
+::   F1() = F2()
+::   provided
+:: A1: for n being Nat holds F1().n = F(F1()|n) and
+:: A2: for n being Nat holds F2().n = F(F2()|n)
+:: proof
+::   deffunc FX(set) = F(IFXFinSequence($1,X()));
+::   reconsider f1=F1() as Function;
+::   reconsider f2=F2() as Function;
+:: A3: dom f1 = NAT & for n being Nat holds f1.n = FX(f1|n)
+::   proof
+::     thus dom f1 = NAT by FUNCT_2:def 1;
+::     let n be Nat;
+::     thus f1.n = F(F1()|n) by A1 .= FX(f1|n) by Def1;
+::   end;
+:: A4: dom f2 = NAT & for n being Nat holds f2.n = FX(f2|n)
+::   proof
+::     thus dom f2 = NAT by FUNCT_2:def 1;
+::     let n be Nat;
+::     thus f2.n = F(F2()|n) by A2 .= FX(f2|n) by Def1;
+::   end;
+::   f1 = f2 from FuncRecursiveUniq(A3,A4);
+::   hence thesis;
+:: end;
