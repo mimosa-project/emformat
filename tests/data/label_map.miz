@@ -1,0 +1,46 @@
+registration
+  cluster CONF -> CR for ARS;
+  coherence
+  proof let X;
+    assume
+A1: X is CONF;
+    let x;
+    defpred P[Element of X] means x >><< $1;
+A3: for y,z st y <==> z & P[y] holds P[z]
+    proof
+      let y,z;
+      assume
+B1:   y <==> z & P[y];
+      consider u such that
+B2:   x =*=> u & u <=*= y by B1,DEF2;
+      per cases by B1;
+      suppose
+B3:     y ==> z;
+        y =*=> z by B3,Th2; then
+        u <<>> z by B2;
+        hence P[z] by A1,B2,Lm5;
+      end;
+      suppose
+B5:     y <== z;
+        thus P[z] by B1,B5,Th2,Lm5;
+      end;
+    end;
+    for y,z st y <=*=> z & P[y] holds P[z] from Star2(A3);
+    hence thesis;
+  end;
+end;
+
+definition
+  let T be RelStr;
+  attr T is Noetherian means
+  :Def1:
+  the InternalRel of T is co-well_founded;
+end;
+
+definition
+  let T be TA-structure;
+  attr T is consistent means
+  :Def9:
+  for t being type of T for a being
+  adjective of T st a in adjs t holds not non-a in adjs t;
+end;

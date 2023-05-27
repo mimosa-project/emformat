@@ -52,6 +52,17 @@ newline_miz_controller = MizController()
 newline_miz_controller.exec_file(f"{TEST_DIR}/data/newline.miz", f"{TEST_DIR}/data/mml.vct")
 newline_token_table = newline_miz_controller.token_table
 
+real_1_miz_controller = MizController()
+real_1_miz_controller.exec_file(f"{TEST_DIR}/data/real_1.miz", f"{TEST_DIR}/data/mml.vct")
+real_1_token_table = real_1_miz_controller.token_table
+real_1_ast_root = real_1_miz_controller.ast_root
+
+
+label_map_miz_controller = MizController()
+label_map_miz_controller.exec_file(f"{TEST_DIR}/data/label_map.miz", f"{TEST_DIR}/data/mml.vct")
+label_map_token_table = label_map_miz_controller.token_table
+label_map_ast_root = label_map_miz_controller.ast_root
+
 
 def test_cut_center_space_format_is_valid1():
     cut_center_space_value = 100
@@ -219,7 +230,7 @@ def test_determine_body_part_indentation_widths2():
         2,
         2,
         2,
-        2
+        2,
     ]
 
 
@@ -401,4 +412,38 @@ def test_adjust_newline_position():
         ["let", "n"],
         ["be", "Nat", ";"],
         ["end", ";"],
+    ]
+
+
+def test_generate_token_blocks():
+    result = generate_token_blocks(real_1_ast_root, real_1_token_table)
+    assert ([token_blocks[0].line_number for token_blocks in result]) == [31, 37, 46, 56, 64, 82]
+
+    assert (convert_tokens_to_text_array(result[0])) == [
+        "registration",
+        "cluster",
+        "->",
+        "real",
+        "for",
+        "Element",
+        "of",
+        "REAL",
+        ";",
+        "coherence",
+        ";",
+        "end",
+    ]
+
+
+def test_generate_label_mapping():
+    result = generate_label_mapping(
+        generate_token_blocks(label_map_ast_root, label_map_token_table)
+    )
+    assert (list(filter(lambda v: re.match(r"A|B", v[1]), result.items()))) == [
+        (14, "A1"),
+        (35, "A2"),
+        (65, "B1"),
+        (83, "B2"),
+        (109, "B3"),
+        (150, "B4"),
     ]
