@@ -573,10 +573,12 @@ def generate_label_mapping(token_blocks) -> dict[int, str]:
         # label_var_counts = {ラベル変数名: カウント, ...}
         # "A1"の"A"をラベル変数名とする
         label_var_counts: dict[str, int] = {}
-        for token in token_block:
+        for i in range(len(token_block)):
+            token = token_block[i]
             if (
                 token.token_type == TokenType.IDENTIFIER
                 and token.identifier_type == IdentifierType.LABEL
+                and token_block[i - 1].text != ":"  # :Def: を除外
                 and token.ref_token is None
             ):
                 label_var = (

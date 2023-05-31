@@ -31,18 +31,11 @@ B5:     y <== z;
 end;
 
 definition
-  let T be RelStr;
-  attr T is Noetherian means
-  :Def1:
-  the InternalRel of T is co-well_founded;
-end;
-
-definition
-  let T be TA-structure;
-  attr T is consistent means
-  :Def9:
-  for t being type of T for a being
-  adjective of T st a in adjs t holds not non-a in adjs t;
+  let X,x be set;
+  func IFXFinSequence(x,X) -> XFinSequence of X equals :Def1:
+  x if x is XFinSequence of X
+  otherwise <%>X;
+  correctness;
 end;
 
 scheme
