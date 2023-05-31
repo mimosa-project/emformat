@@ -439,6 +439,7 @@ def test_generate_label_mapping():
     result = generate_label_mapping(
         generate_token_blocks(label_map_ast_root, label_map_token_table)
     )
+    # TODO: mizcoreのIdentifierTypeが修正されたら、filterを削除
     assert (list(filter(lambda v: re.match(r"A|B", v[1]), result.items()))) == [
         (14, "A1"),
         (35, "A2"),
@@ -446,4 +447,10 @@ def test_generate_label_mapping():
         (83, "B2"),
         (109, "B3"),
         (150, "B4"),
+        (332, "B1"),
+        (341, "B2"),
+        (446, "A1"),
+        (468, "A2"),
+        (526, "A3"),
+        (592, "A4"),
     ]

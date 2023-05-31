@@ -15,6 +15,8 @@ from py_miz_controller import (
     IdentifierType,
     ASTToken,
     ASTBlock,
+    ASTStatement,
+    StatementType,
 )
 
 
@@ -510,11 +512,25 @@ def find_first_no_empty_array_i(array) -> int:
 
 
 def generate_block_ranges(ast_root) -> list[list[int]]:
-    block_ranges = []
+    block_ranges: list[list[int]] = []
     for i in range(ast_root.child_component_num):
-        if type(ast_root.child_component(i)) == ASTBlock:
-            block = ast_root.child_component(i)
-            block_ranges.append([block.first_token.id, block.last_token.id])
+        ast_component = ast_root.child_component(i)
+
+        if type(ast_component) == ASTBlock:
+            if (
+                i != 0
+                and type(ast_root.child_component(i - 1)) == ASTStatement
+                and ast_root.child_component(i - 1).statement_type == StatementType.SCHEME
+            ):
+                # Schemeブロック内でproofブロックが出現する場合、
+                # Schemeブロック先頭からproofブロック末尾までをまとめて一つのブロックとみなす
+                block_ranges[-1][1] = ast_component.last_token.id
+            else:
+                block_ranges.append([ast_component.first_token.id, ast_component.last_token.id])
+        elif ast_component.statement_type == StatementType.SCHEME:
+            block_ranges.append(
+                [ast_component.range_first_token.id, ast_component.range_last_token.id]
+            )
 
     return block_ranges
 
