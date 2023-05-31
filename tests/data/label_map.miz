@@ -30,6 +30,35 @@ B5:     y <== z;
   end;
 end;
 
+registration
+  let S be non empty Signature;
+  cluster -> non empty for Extension of S;
+  coherence
+  proof
+    set x = the Element of S;
+    let E be Extension of S;
+    S is Subsignature of E by Def5;
+    then
+B: the carrier of S c= the carrier of E by INSTALG1:10;
+    x in the carrier of S;
+    hence the carrier of E is non empty by B;
+  end;
+end;
+
+theorem Th17:
+  for T1,T2 being TA-structure st the TA-structure of T1 = the
+  TA-structure of T2 holds T1 is adjs-typed implies T2 is adjs-typed
+proof
+  let T1,T2 be TA-structure such that
+A0: the TA-structure of T1 = the TA-structure of T2 and
+A4: for a being adjective of T1 holds types a \/ types non-a is non empty;
+  let b be adjective of T2;
+  reconsider a = b as adjective of T1 by A0;
+A1: types a \/ types non-a is non empty by A4;
+  types a = types b by A0,Th11;
+  hence thesis by A0,A1,Th11;
+end;
+
 definition
   let X,x be set;
   func IFXFinSequence(x,X) -> XFinSequence of X equals :Def1:
