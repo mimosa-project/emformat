@@ -5,9 +5,20 @@ import utils.option as option
 import logging
 import itertools
 from typing import Any
+import re
 
 
-from py_miz_controller import MizController, TokenType, KeywordType, IdentifierType, ASTToken
+from py_miz_controller import (
+    MizController,
+    TokenType,
+    KeywordType,
+    IdentifierType,
+    ASTToken,
+    ASTBlock,
+    ASTStatement,
+    StatementType,
+    BlockType
+)
 
 
 def main(argv):
@@ -87,6 +98,7 @@ def determine_space_omission(tokens: list[ASTToken]) -> list[list[ASTToken]]:
     no_space_tokens = []
 
     for current_pos in range(len(tokens)):
+        # TODO: ここでラベルチェック+置換
         token_text = tokens[current_pos].text
 
         if current_pos == 0:
@@ -498,6 +510,92 @@ def find_first_no_empty_array_i(array) -> int:
     for i, elm in enumerate(array):
         if elm != []:
             return i
+
+
+def generate_block_ranges(ast_root) -> list[list[int]]:
+    block_ranges: list[list[int]] = []
+    for i in range(ast_root.child_component_num):
+        ast_component = ast_root.child_component(i)
+
+        if type(ast_component) == ASTBlock:
+            if (
+                i != 0
+                and type(ast_root.child_component(i).block_type == BlockType.PROOF)
+                and type(ast_root.child_component(i - 1)) == ASTStatement
+                and ast_root.child_component(i - 1).statement_type == StatementType.SCHEME
+            ):
+                # Schemeブロック内でproofブロックが出現する場合、
+                # Schemeブロック先頭からproofブロック末尾までをまとめて一つのブロックとみなす
+                block_ranges[-1][1] = ast_component.last_token.id
+            else:
+                block_ranges.append([ast_component.first_token.id, ast_component.last_token.id])
+        elif ast_component.statement_type == StatementType.SCHEME:
+            block_ranges.append(
+                [ast_component.range_first_token.id, ast_component.range_last_token.id]
+            )
+
+    return block_ranges
+
+
+def generate_token_blocks(ast_root, token_table) -> list[list[ASTToken]]:
+    block_ranges = generate_block_ranges(ast_root)
+
+    if len(block_ranges) == 0:
+        return []
+
+    first_token_id, last_token_id = block_ranges.pop(0)
+
+    token_blocks = []
+    token_block = []
+    is_in_block = False
+
+    for i in range(token_table.token_num):
+        token = token_table.token(i)
+
+        if token.id == first_token_id:
+            is_in_block = True
+
+        if is_in_block:
+            token_block.append(token)
+
+        if token.id == last_token_id:
+            is_in_block = False
+            token_blocks.append(token_block)
+            token_block = []
+
+            if len(block_ranges) == 0:
+                return token_blocks
+            first_token_id, last_token_id = block_ranges.pop(0)
+
+
+# チェック対象のラベルに対して、{トークンID: ラベル名} のリストを返す
+def generate_label_mapping(token_blocks) -> dict[int, str]:
+    label_mapping = {}
+    for token_block in token_blocks:
+        # label_var_counts = {ラベル変数名: カウント, ...}
+        # "A1"の"A"をラベル変数名とする
+        label_var_counts: dict[str, int] = {}
+        for i in range(len(token_block)):
+            token = token_block[i]
+            if (
+                token.token_type == TokenType.IDENTIFIER
+                and token.identifier_type == IdentifierType.LABEL
+                and token_block[i - 1].text != ":"  # :Def: を除外
+                and token.ref_token is None
+            ):
+                label_var = (
+                    re.match(r"^(.*?)\d+$", token.text).group(1)
+                    if re.search(r"\d+$", token.text)
+                    else token.text
+                )
+                # 初めて登場するラベル変数名の場合、カウントを初期化
+                if label_var not in label_var_counts.keys():
+                    label_var_counts[label_var] = 1
+
+                label_mapping[token.id] = f"{label_var}{label_var_counts[label_var]}"
+                label_var_counts[label_var] += 1
+
+    return label_mapping
 
 
 if __name__ == "__main__":
