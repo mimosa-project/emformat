@@ -17,6 +17,7 @@ from py_miz_controller import (
     ASTBlock,
     ASTStatement,
     StatementType,
+    BlockType
 )
 
 
@@ -519,6 +520,7 @@ def generate_block_ranges(ast_root) -> list[list[int]]:
         if type(ast_component) == ASTBlock:
             if (
                 i != 0
+                and type(ast_root.child_component(i).block_type == BlockType.PROOF)
                 and type(ast_root.child_component(i - 1)) == ASTStatement
                 and ast_root.child_component(i - 1).statement_type == StatementType.SCHEME
             ):
