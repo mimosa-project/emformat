@@ -36,7 +36,7 @@ def main(argv):
 
 # デフォルトの項目値を設定
 def load_settings():
-    with open("{}/settings.json".format(os.path.dirname(__file__)), "r") as f:
+    with open("{}/default_settings.json".format(os.path.dirname(__file__)), "r") as f:
         settings = json.load(f)
         for setting_key, setting_value in settings.items():
             # CUT_CENTER_SPACE の場合、型チェックを行う
