@@ -75,6 +75,8 @@ def override_settings(user_settings: dict):
         elif setting_key in ["CUT_LEFT_SPACE", "CUT_RIGHT_SPACE"]:
             if type(setting_value) != list:
                 continue
+        else:
+            continue
 
         setattr(option, setting_key, setting_value)
 
