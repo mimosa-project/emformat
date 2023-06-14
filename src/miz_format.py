@@ -29,7 +29,7 @@ def main(argv):
 
     load_settings()
     formatted_lines = format(token_table)
-    output(formatted_lines)
+    output(miz_path, formatted_lines)
 
 
 def load_settings():
@@ -48,9 +48,8 @@ def load_settings():
             setattr(option, setting_key, setting_value)
 
 
-def output(output_lines):
-    # with open(miz_path, "w") as f:
-    with open("tests/data/result.miz", "w") as f:
+def output(miz_path, output_lines):
+    with open(miz_path, "w") as f:
         f.writelines([f"{line}\n" for line in output_lines])
 
 
