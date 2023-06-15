@@ -17,7 +17,7 @@ from py_miz_controller import (
     ASTBlock,
     ASTStatement,
     StatementType,
-    BlockType
+    BlockType,
 )
 
 
@@ -112,7 +112,9 @@ def determine_space_omission(tokens: list[ASTToken]) -> list[list[ASTToken]]:
 
         if option.CUT_CENTER_SPACE.get((left_representative_name, representative_name)):
             no_space_tokens.append(token_text)
-        elif (
+        elif option.CUT_CENTER_SPACE.get(
+            (left_representative_name, representative_name)
+        ) is not False and (
             representative_name in option.CUT_LEFT_SPACE
             or left_representative_name in option.CUT_RIGHT_SPACE
         ):
