@@ -22,18 +22,21 @@ from py_miz_controller import (
 
 
 def main(argv):
-    _, miz_path, vct_path = argv
+    _, miz_path, vct_path, user_settings = argv
+    user_settings = json.loads(user_settings)
     miz_controller = MizController()
     miz_controller.exec_file(miz_path, vct_path)
     token_table = miz_controller.token_table
 
+    override_settings(user_settings)
     load_settings()
     formatted_lines = format(token_table)
-    output(formatted_lines)
+    output(miz_path, formatted_lines)
 
 
+# デフォルトの項目値を設定
 def load_settings():
-    with open("{}/settings.json".format(os.path.dirname(__file__)), "r") as f:
+    with open("{}/default_settings.json".format(os.path.dirname(__file__)), "r") as f:
         settings = json.load(f)
         for setting_key, setting_value in settings.items():
             # CUT_CENTER_SPACE の場合、型チェックを行う
@@ -45,12 +48,41 @@ def load_settings():
                 # 複合キーの型変換
                 setting_value = {tuple(k.split()): v for k, v in setting_value.items()}
 
-            setattr(option, setting_key, setting_value)
+            if not hasattr(option, setting_key):
+                setattr(option, setting_key, setting_value)
 
 
-def output(output_lines):
-    # with open(miz_path, "w") as f:
-    with open("tests/data/result.miz", "w") as f:
+# ユーザーが指定した項目値を設定
+def override_settings(user_settings: dict):
+    for setting_key, setting_value in user_settings.items():
+        # バリデーションチェック
+        if setting_key == "CUT_CENTER_SPACE":
+            if cut_center_space_format_is_valid(setting_value):
+                # 複合キーの型変換
+                setting_value = {tuple(k.split()): v for k, v in setting_value.items()}
+            else:
+                continue
+        elif setting_key in [
+            "MAX_LINE_LENGTH",
+            "STANDARD_INDENTATION_WIDTH",
+            "ENVIRON_DIRECTIVE_INDENTATION_WIDTH",
+            "ENVIRON_LINE_INDENTATION_WIDTH",
+        ]:
+            if re.fullmatch(r"\d+", setting_value):
+                setting_value = int(setting_value)
+            else:
+                continue
+        elif setting_key in ["CUT_LEFT_SPACE", "CUT_RIGHT_SPACE"]:
+            if type(setting_value) != list:
+                continue
+        else:
+            continue
+
+        setattr(option, setting_key, setting_value)
+
+
+def output(miz_path, output_lines):
+    with open(miz_path, "w") as f:
         f.writelines([f"{line}\n" for line in output_lines])
 
 
