@@ -94,6 +94,18 @@ def test_convert_to_token_representative_name2():
     assert (convert_to_token_representative_name(token)) == ":"
 
 
+def test_separable_tokens_list():
+    tokens = generate_token_lines(token_table)[45]
+    assert (convert_token_lines_to_text_arrays(separable_tokens_list(miz_controller, tokens))) == [
+        ["reserve"],
+        ["p", ",", "q"],
+        ["for"],
+        ["Point"],
+        ["of"],
+        ["TOP-REAL", "2", ";"],
+    ]
+
+
 def test_generate_token_lines():
     assert ([token.text for token in generate_token_lines(token_table)[44]]) == [
         "reserve",
