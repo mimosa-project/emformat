@@ -30,7 +30,7 @@ def main(argv):
 
     override_settings(user_settings)
     load_settings()
-    formatted_lines = format(token_table)
+    formatted_lines = format(miz_controller, token_table)
     output(miz_path, formatted_lines)
 
 
@@ -120,21 +120,16 @@ def generate_token_lines(token_table) -> list[list[ASTToken]]:
     return token_lines
 
 
-# 実際にはmizcore側に実装
-def is_separable_tokens(tokens):
-    return True
-
-
-def determine_space_omission(tokens: list[ASTToken]) -> list[list[ASTToken]]:
+def determine_space_omission(miz_controller, tokens: list[ASTToken]) -> list[list[ASTToken]]:
     no_space_tokens_list = []
     no_space_tokens = []
 
     for current_pos in range(len(tokens)):
         # TODO: ここでラベルチェック+置換
-        token_text = tokens[current_pos].text
+        token = tokens[current_pos]
 
         if current_pos == 0:
-            no_space_tokens.append(token_text)
+            no_space_tokens.append(token)
             if len(tokens) == 1:
                 no_space_tokens_list.append(no_space_tokens)
             continue
@@ -143,31 +138,31 @@ def determine_space_omission(tokens: list[ASTToken]) -> list[list[ASTToken]]:
         left_representative_name = convert_to_token_representative_name(tokens[current_pos - 1])
 
         if option.CUT_CENTER_SPACE.get((left_representative_name, representative_name)):
-            no_space_tokens.append(token_text)
+            no_space_tokens.append(token)
         elif option.CUT_CENTER_SPACE.get(
             (left_representative_name, representative_name)
         ) is not False and (
             representative_name in option.CUT_LEFT_SPACE
             or left_representative_name in option.CUT_RIGHT_SPACE
         ):
-            no_space_tokens.append(token_text)
+            no_space_tokens.append(token)
         else:
-            no_space_tokens_list.extend(separable_tokens_list(no_space_tokens))
-            no_space_tokens = [token_text]
+            no_space_tokens_list.extend(separable_tokens_list(miz_controller, no_space_tokens))
+            no_space_tokens = [token]
 
         if current_pos == len(tokens) - 1:
-            no_space_tokens_list.extend(separable_tokens_list(no_space_tokens))
+            no_space_tokens_list.extend(separable_tokens_list(miz_controller, no_space_tokens))
 
     return no_space_tokens_list
 
 
-def separable_tokens_list(tokens: list[ASTToken]) -> list[list[ASTToken]]:
+def separable_tokens_list(miz_controller, tokens: list[ASTToken]) -> list[list[ASTToken]]:
     separable_tokens_list = []
     begin_pos = 0
     end_pos = len(tokens)
 
     while True:
-        if is_separable_tokens(tokens[begin_pos:end_pos]):
+        if miz_controller.is_separable_tokens(tokens[begin_pos:end_pos]):
             separable_tokens_list.append(tokens[begin_pos:end_pos])
             if end_pos == len(tokens):
                 break
@@ -180,9 +175,11 @@ def separable_tokens_list(tokens: list[ASTToken]) -> list[list[ASTToken]]:
     return separable_tokens_list
 
 
-def convert_tokens_to_text(tokens: list[ASTToken]) -> str:
+def convert_tokens_to_text(miz_controller, tokens: list[ASTToken]) -> str:
     output_line = ""
-    no_space_tokens_list = determine_space_omission(tokens)
+    no_space_tokens_list = convert_token_lines_to_text_arrays(
+        determine_space_omission(miz_controller, tokens)
+    )
 
     for tokens in no_space_tokens_list:
         output_line += f" {''.join(tokens)}"
@@ -190,11 +187,11 @@ def convert_tokens_to_text(tokens: list[ASTToken]) -> str:
     return output_line.lstrip()
 
 
-def convert_token_lines_to_texts(token_lines: list[list[ASTToken]]) -> list[str]:
+def convert_token_lines_to_texts(miz_controller, token_lines: list[list[ASTToken]]) -> list[str]:
     output_lines = []
 
     for tokens in token_lines:
-        output_lines.append(convert_tokens_to_text(tokens))
+        output_lines.append(convert_tokens_to_text(miz_controller, tokens))
     return output_lines
 
 
@@ -212,21 +209,21 @@ def convert_token_lines_to_text_arrays(token_lines: list[list[ASTToken]]) -> lis
     return texts
 
 
-def format(token_table) -> list[str]:
+def format(miz_controller, token_table) -> list[str]:
     token_lines = generate_token_lines(token_table)
     env_part_token_lines, body_part_token_lines = split_into_env_and_body_part(token_lines)
-    env_part_lines = format_env_part(env_part_token_lines)
-    body_part_lines = format_body_part(body_part_token_lines)
+    env_part_lines = format_env_part(miz_controller, env_part_token_lines)
+    body_part_lines = format_body_part(miz_controller, body_part_token_lines)
     return env_part_lines + body_part_lines
 
 
-def format_env_part(env_part_token_lines: list[list[ASTToken]]) -> list[str]:
+def format_env_part(miz_controller, env_part_token_lines: list[list[ASTToken]]) -> list[str]:
     # 元の改行位置は無視して一度文単位に変換する
     normalized_token_lines = normalize_blank_line(
         (split_env_part_token_lines_into_sentences(adjust_newline_position(env_part_token_lines)))
     )
     indentation_widths = determine_env_part_indentation_widths(normalized_token_lines)
-    space_adjusted_lines = convert_token_lines_to_texts(normalized_token_lines)
+    space_adjusted_lines = convert_token_lines_to_texts(miz_controller, normalized_token_lines)
 
     output_lines = []
     for indentation_width, line in zip(indentation_widths, space_adjusted_lines):
@@ -241,10 +238,10 @@ def format_env_part(env_part_token_lines: list[list[ASTToken]]) -> list[str]:
     return output_lines
 
 
-def format_body_part(body_part_token_lines: list[list[ASTToken]]) -> list[str]:
+def format_body_part(miz_controller, body_part_token_lines: list[list[ASTToken]]) -> list[str]:
     normalized_token_lines = normalize_blank_line(adjust_newline_position(body_part_token_lines))
     indentation_widths = determine_body_part_indentation_widths(normalized_token_lines)
-    space_adjusted_lines = convert_token_lines_to_texts(normalized_token_lines)
+    space_adjusted_lines = convert_token_lines_to_texts(miz_controller, normalized_token_lines)
 
     output_lines = []
     for indentation_width, line in zip(indentation_widths, space_adjusted_lines):

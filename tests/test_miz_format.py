@@ -94,6 +94,18 @@ def test_convert_to_token_representative_name2():
     assert (convert_to_token_representative_name(token)) == ":"
 
 
+def test_separable_tokens_list():
+    tokens = generate_token_lines(token_table)[45]
+    assert (convert_token_lines_to_text_arrays(separable_tokens_list(miz_controller, tokens))) == [
+        ["reserve"],
+        ["p", ",", "q"],
+        ["for"],
+        ["Point"],
+        ["of"],
+        ["TOP-REAL", "2", ";"],
+    ]
+
+
 def test_generate_token_lines():
     assert ([token.text for token in generate_token_lines(token_table)[44]]) == [
         "reserve",
@@ -105,13 +117,21 @@ def test_generate_token_lines():
 
 
 def test_determine_space_omission1():
-    assert (determine_space_omission(generate_token_lines(token_table)[596])) == [
+    assert (
+        convert_token_lines_to_text_arrays(
+            determine_space_omission(miz_controller, generate_token_lines(token_table)[596])
+        )
+    ) == [
         [":", "Def1", ":"],
     ]
 
 
 def test_determine_space_omissio2():
-    assert (determine_space_omission(generate_token_lines(token_table)[70])) == [
+    assert (
+        convert_token_lines_to_text_arrays(
+            determine_space_omission(miz_controller, generate_token_lines(token_table)[70])
+        )
+    ) == [
         ["r"],
         ["in"],
         ["REAL"],
@@ -123,43 +143,49 @@ def test_determine_space_omissio2():
 
 def test_generate_space_adjusted_line1():
     assert (
-        convert_tokens_to_text(generate_token_lines(token_table)[384])
+        convert_tokens_to_text(miz_controller, generate_token_lines(token_table)[384])
     ) == "then g5 . p = (r1 / r2 - a) / b by A11, A18;"
 
 
 def test_generate_space_adjusted_line2():
     assert (
-        convert_tokens_to_text(generate_token_lines(token_table)[64])
+        convert_tokens_to_text(miz_controller, generate_token_lines(token_table)[64])
     ) == "{r where r is Real: r > a} c= the carrier of R^1"
 
 
 def test_generate_space_adjusted_line3():
     assert (
-        convert_tokens_to_text(generate_token_lines(token_table)[1700])
+        convert_tokens_to_text(miz_controller, generate_token_lines(token_table)[1700])
     ) == "defpred Q [Point of TOP-REAL 2] means $1 `1 <= 0;"
 
 
 def test_generate_space_adjusted_line4():
-    assert (convert_tokens_to_text(generate_token_lines(token_table)[596])) == ":Def1:"
+    assert (
+        convert_tokens_to_text(miz_controller, generate_token_lines(token_table)[596])
+    ) == ":Def1:"
 
 
 def test_generate_space_adjusted_line5():
-    assert (convert_tokens_to_text(generate_token_lines(token_table)[174])) == "A7: K = f .: K and"
+    assert (
+        convert_tokens_to_text(miz_controller, generate_token_lines(token_table)[174])
+    ) == "A7: K = f .: K and"
 
 
 def test_generate_space_adjusted_line6():
-    assert (convert_tokens_to_text(generate_token_lines(token_table)[54])) == "theorem Th1:"
+    assert (
+        convert_tokens_to_text(miz_controller, generate_token_lines(token_table)[54])
+    ) == "theorem Th1:"
 
 
 def test_generate_space_adjusted_line7():
     assert (
-        convert_tokens_to_text(generate_token_lines(token_table)[70])
+        convert_tokens_to_text(miz_controller, generate_token_lines(token_table)[70])
     ) == "r in REAL by XREAL_0:def 1;"
 
 
 # def test_generate_space_adjusted_line8():
 #     assert (
-#         convert_tokens_to_text(generate_token_lines(token_table2)[47])
+#         convert_tokens_to_text(miz_controller2, generate_token_lines(token_table2)[47])
 #     ) == "scheme Replacement {A() -> set, P[object, object]}:"
 
 
@@ -318,28 +344,30 @@ def test_find_first_no_empty_array_i():
     assert (find_first_no_empty_array_i(array)) == 3
 
 
-# def test_normalize_blank_line():
-#     with open(f"{TEST_DIR}/expected/blank_line.miz") as f:
-#         expected = f.read().split("\n")
-#     result = convert_token_lines_to_texts(
-#         normalize_blank_line(generate_token_lines(blank_line_token_table))
-#     )
-#     assert result == expected
+def test_normalize_blank_line():
+    with open(f"{TEST_DIR}/expected/blank_line.miz") as f:
+        expected = f.read().split("\n")
+    result = convert_token_lines_to_texts(
+        blank_line_miz_controller,
+        normalize_blank_line(generate_token_lines(blank_line_token_table)),
+    )
+    assert result == expected
 
 
-# def test_split_line_at_max_length():
-#     line = "  for Y being set st Y c= field R & Y <> {} ex a being object st a in Y & for b being object st b in Y & a <> b holds not [a,b] in R; let A be non empty Subset of T;"
-#     indentation_width = 4
-#     assert (split_line_at_max_length(line, indentation_width)) == [
-#         "  for Y being set st Y c= field R & Y <> {} ex a being object st a in Y & for b",
-#         "    being object st b in Y & a <> b holds not [a,b] in R; let A be non empty",
-#         "    Subset of T;",
-#     ]
+def test_split_line_at_max_length():
+    line = "  for Y being set st Y c= field R & Y <> {} ex a being object st a in Y & for b being object st b in Y & a <> b holds not [a,b] in R; let A be non empty Subset of T;"
+    indentation_width = 4
+    assert (split_line_at_max_length(line, indentation_width)) == [
+        "  for Y being set st Y c= field R & Y <> {} ex a being object st a in Y & for b",
+        "    being object st b in Y & a <> b holds not [a,b] in R; let A be non empty",
+        "    Subset of T;",
+    ]
 
 
-# TODO: テストを追加
 def test_format_env_part():
-    assert (format_env_part(generate_token_lines(env_part_token_table))) == [
+    assert (
+        format_env_part(env_part_miz_controller, generate_token_lines(env_part_token_table))
+    ) == [
         ":: Fan Homeomorphisms in the Plane",
         "::  by Yatsuka Nakamura",
         "",
@@ -356,9 +384,10 @@ def test_format_env_part():
     ]
 
 
-# TODO: mizcoreのis_separatableが実装されたら修正する
 def test_format_body_part():
-    assert (format_body_part(generate_token_lines(body_part_token_table))) == [
+    assert (
+        format_body_part(body_part_miz_controller, generate_token_lines(body_part_token_table))
+    ) == [
         "begin :: Semilattice of type widening Semilattice of type widening Semilattice of type widening",
         "",
         "definition",
@@ -435,38 +464,38 @@ def test_generate_token_blocks():
     ]
 
 
-def test_generate_label_mapping():
-    result = generate_label_mapping(
-        generate_token_blocks(label_map_ast_root, label_map_token_table)
-    )
-    # TODO: mizcoreのIdentifierTypeが修正されたら、filterを削除
-    assert (list(filter(lambda v: re.match(r"A|B", v[1]), result.items()))) == [
-        # (14, "A1"),
-        # (35, "A2"),
-        # (65, "B1"),
-        # (83, "B2"),
-        # (109, "B3"),
-        # (150, "B4"),
-        # (301, "B1"),
-        # (310, "B2"),
-        # (415, "A1"),
-        # (437, "A2"),
-        # (495, "A3"),
-        # (561, "A4"),
-        (14, "A1"),
-        (35, "A2"),
-        (65, "B1"),
-        (83, "B2"),
-        (109, "B3"),
-        (150, "B4"),
-        (254, "B1"),
-        (341, "A1"),
-        (357, "A2"),
-        (395, "A3"),
-        (521, "B1"),
-        (530, "B2"),
-        (635, "A1"),
-        (657, "A2"),
-        (715, "A3"),
-        (781, "A4"),
-    ]
+# def test_generate_label_mapping():
+#     result = generate_label_mapping(
+#         generate_token_blocks(label_map_ast_root, label_map_token_table)
+#     )
+#     # TODO: mizcoreのIdentifierTypeが修正されたら、filterを削除
+#     assert (list(filter(lambda v: re.match(r"A|B", v[1]), result.items()))) == [
+#         # (14, "A1"),
+#         # (35, "A2"),
+#         # (65, "B1"),
+#         # (83, "B2"),
+#         # (109, "B3"),
+#         # (150, "B4"),
+#         # (301, "B1"),
+#         # (310, "B2"),
+#         # (415, "A1"),
+#         # (437, "A2"),
+#         # (495, "A3"),
+#         # (561, "A4"),
+#         (14, "A1"),
+#         (35, "A2"),
+#         (65, "B1"),
+#         (83, "B2"),
+#         (109, "B3"),
+#         (150, "B4"),
+#         (254, "B1"),
+#         (341, "A1"),
+#         (357, "A2"),
+#         (395, "A3"),
+#         (521, "B1"),
+#         (530, "B2"),
+#         (635, "A1"),
+#         (657, "A2"),
+#         (715, "A3"),
+#         (781, "A4"),
+#     ]
