@@ -429,6 +429,7 @@ def adjust_newline_position(token_lines: list[list[ASTToken]]) -> list[list[ASTT
                     current_line_tokens = []
             elif (
                 tokens[current_pos].text == ":"
+                and current_pos >= 2
                 and tokens[current_pos - 2].text not in [":", "theorem"]
                 and tokens[current_pos - 1].token_type == TokenType.IDENTIFIER
                 and tokens[current_pos - 1].identifier_type == IdentifierType.LABEL
