@@ -10,6 +10,8 @@ import yaml
 parent_dir = str(pathlib.Path(__file__).parent.parent.parent)
 sys.path.append(parent_dir)
 
+os.environ["ENV"] = "test"
+
 TEST_DIR = f"{os.getcwd()}/tests"
 
 load_settings()
@@ -491,6 +493,7 @@ def test_generate_label_mapping():
 
 
 def test_set_formatted_text():
+    os.environ["ENV"] = ""
     set_formatted_text(label_map_ast_root, label_map_token_table)
     assert [
         label_map_token_table.token(i).formatted_text
