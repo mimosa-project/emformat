@@ -502,6 +502,7 @@ def test_set_formatted_text():
             label_map_token_table.token(i).token_type == TokenType.IDENTIFIER
             and label_map_token_table.token(i).identifier_type == IdentifierType.LABEL
             and label_map_token_table.token(i).ref_token is None
+            and not re.match(r"Def|Th", label_map_token_table.token(i).text)
         )
     ] == [
         "A1",
