@@ -10,6 +10,8 @@ import yaml
 parent_dir = str(pathlib.Path(__file__).parent.parent.parent)
 sys.path.append(parent_dir)
 
+os.environ["ENV"] = "test"
+
 TEST_DIR = f"{os.getcwd()}/tests"
 
 load_settings()
@@ -464,38 +466,62 @@ def test_generate_token_blocks():
     ]
 
 
-# def test_generate_label_mapping():
-#     result = generate_label_mapping(
-#         generate_token_blocks(label_map_ast_root, label_map_token_table)
-#     )
-#     # TODO: mizcoreのIdentifierTypeが修正されたら、filterを削除
-#     assert (list(filter(lambda v: re.match(r"A|B", v[1]), result.items()))) == [
-#         # (14, "A1"),
-#         # (35, "A2"),
-#         # (65, "B1"),
-#         # (83, "B2"),
-#         # (109, "B3"),
-#         # (150, "B4"),
-#         # (301, "B1"),
-#         # (310, "B2"),
-#         # (415, "A1"),
-#         # (437, "A2"),
-#         # (495, "A3"),
-#         # (561, "A4"),
-#         (14, "A1"),
-#         (35, "A2"),
-#         (65, "B1"),
-#         (83, "B2"),
-#         (109, "B3"),
-#         (150, "B4"),
-#         (254, "B1"),
-#         (341, "A1"),
-#         (357, "A2"),
-#         (395, "A3"),
-#         (521, "B1"),
-#         (530, "B2"),
-#         (635, "A1"),
-#         (657, "A2"),
-#         (715, "A3"),
-#         (781, "A4"),
-#     ]
+def test_generate_label_mapping():
+    assert (
+        generate_label_mapping(generate_token_blocks(label_map_ast_root, label_map_token_table))
+    ) == {
+        128: "A1",
+        210: "A2",
+        238: "A3",
+        308: "A4",
+        314: "A5",
+        377: "A6",
+        383: "A7",
+        401: "A8",
+        452: "A9",
+        496: "A10",
+        503: "A11",
+        556: "A12",
+        562: "A13",
+        599: "A14",
+        605: "A15",
+        705: "A1",
+        711: "A2",
+        731: "A3",
+        763: "A4",
+    }
+
+
+def test_set_formatted_text():
+    os.environ["ENV"] = ""
+    set_formatted_text(label_map_ast_root, label_map_token_table)
+    assert [
+        label_map_token_table.token(i).formatted_text
+        for i in range(label_map_token_table.token_num)
+        if (
+            label_map_token_table.token(i).token_type == TokenType.IDENTIFIER
+            and label_map_token_table.token(i).identifier_type == IdentifierType.LABEL
+            and label_map_token_table.token(i).ref_token is None
+            and not re.match(r"Def|Th", label_map_token_table.token(i).text)
+        )
+    ] == [
+        "A1",
+        "A2",
+        "A3",
+        "A4",
+        "A5",
+        "A6",
+        "A7",
+        "A8",
+        "A9",
+        "A10",
+        "A11",
+        "A12",
+        "A13",
+        "A14",
+        "A15",
+        "A1",
+        "A2",
+        "A3",
+        "A4",
+    ]

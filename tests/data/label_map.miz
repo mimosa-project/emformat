@@ -1,108 +1,115 @@
-registration
-  cluster CONF -> CR for ARS;
-  coherence
-  proof let X;
-    assume
-A10: X is CONF;
-    let x;
-    defpred P[Element of X] means x >><< $1;
-A3: for y,z st y <==> z & P[y] holds P[z]
-    proof
-      let y,z;
-      assume
-B10:   y <==> z & P[y];
-      consider u such that
-B8:   x =*=> u & u <=*= y by B10,DEF2;
-      per cases by B10;
-      suppose
-B3:     y ==> z;
-        y =*=> z by B3,Th2; then
-        u <<>> z by B8;
-        hence P[z] by A10,B8,Lm5;
-      end;
-      suppose
-B5:     y <== z;
-        thus P[z] by B10,B5,Th2,Lm5;
-      end;
-    end;
-    for y,z st y <=*=> z & P[y] holds P[z] from Star2(A3);
-    hence thesis;
-  end;
-end;
+begin :: Semilattice of type widening
 
-registration
-  let S be non empty Signature;
-  cluster -> non empty for Extension of S;
-  coherence
-  proof
-    set x = the Element of S;
-    let E be Extension of S;
-    S is Subsignature of E by Def5;
-    then
-B: the carrier of S c= the carrier of E by INSTALG1:10;
-    x in the carrier of S;
-    hence the carrier of E is non empty by B;
-  end;
-end;
-
-theorem Th17:
-  for T1,T2 being TA-structure st the TA-structure of T1 = the
-  TA-structure of T2 holds T1 is adjs-typed implies T2 is adjs-typed
-proof
-  let T1,T2 be TA-structure such that
-A0: the TA-structure of T1 = the TA-structure of T2 and
-A4: for a being adjective of T1 holds types a \/ types non-a is non empty;
-  let b be adjective of T2;
-  reconsider a = b as adjective of T1 by A0;
-A1: types a \/ types non-a is non empty by A4;
-  types a = types b by A0,Th11;
-  hence thesis by A0,A1,Th11;
+definition
+  let T be RelStr;
+  attr T is Noetherian means
+  :Def1:
+  the InternalRel of T is co-well_founded;
 end;
 
 definition
-  let X,x be set;
-  func IFXFinSequence(x,X) -> XFinSequence of X equals :Def1:
-  x if x is XFinSequence of X
-  otherwise <%>X;
-  correctness;
+  let T be non empty RelStr;
+  redefine attr T is Noetherian means
+  :Def2:
+  for A being non empty Subset of T
+  ex a being Element of T st a in A & for b being Element of T st b in A holds
+  not a < b;
+  compatibility
+  proof
+    set R = the InternalRel of T;
+    thus T is Noetherian implies for A being non empty Subset of T ex a being
+    Element of T st a in A & for b being Element of T st b in A holds not a < b
+    proof
+      assume
+A10:   for Y being set st Y c= field R & Y <> {}
+      ex a being object st a in
+      Y & for b being object st b in Y & a <> b holds not [a,b] in R;
+      let A be non empty Subset of T;
+      set a = the Element of A;
+      reconsider a as Element of T;
+      set Y = A /\ field R;
+      per cases;
+      suppose
+A20:     A misses field R;
+        take a;
+        thus a in A;
+        let b be Element of T;
+        assume that
+        b in A and
+A30:     a < b;
+        a <= b by A30,ORDERS_2:def 6;
+        then [a,b] in R by ORDERS_2:def 5;
+        then a in field R by RELAT_1:15;
+        hence contradiction by A20,XBOOLE_0:3;
+      end;
+      suppose
+        A meets field R;
+        then Y <> {};
+        then consider x being object such that
+A4:     x in Y and
+A5:     for y being object st y in Y & x <> y holds not [x,y] in R by A10,
+XBOOLE_1:17;
+        reconsider x as Element of T by A4;
+        take x;
+        thus x in A by A4,XBOOLE_0:def 4;
+        let b be Element of T;
+        assume that
+A6:     b in A and
+A7:     x < b;
+        x <= b by A7,ORDERS_2:def 6;
+        then
+A8:     [x,b] in R by ORDERS_2:def 5;
+        then b in field R by RELAT_1:15;
+        then b in Y by A6,XBOOLE_0:def 4;
+        hence contradiction by A5,A7,A8;
+      end;
+    end;
+    assume
+A9: for A being non empty Subset of T ex a being Element of T st a in
+    A & for b being Element of T st b in A holds not a < b;
+    let Y be set;
+    assume that
+A100: Y c= field R and
+A110: Y <> {};
+    field R c= (the carrier of T) \/ the carrier of T by RELSET_1:8;
+    then reconsider A = Y as non empty Subset of T by A100,A110,XBOOLE_1:1;
+    consider a being Element of T such that
+A120: a in A and
+A130: for b being Element of T st b in A holds not a < b by A9;
+    take a;
+    thus a in Y by A120;
+    let b be object;
+    assume that
+A140: b in Y and
+A150: a <> b;
+    b in A by A140;
+    then reconsider b as Element of T;
+    not a < b by A130,A140;
+    then not a <= b by A150,ORDERS_2:def 6;
+    hence thesis by ORDERS_2:def 5;
+  end;
 end;
 
-scheme
-  MSSLambda { I() -> set, F(object) -> object }:
-  ex f being ManySortedSet of I() st
-  for i being set st i in I() holds f.i = F(i);
-  consider f being Function such that
-B3: dom f = I() and
-B6: for i being object st i in I() holds f.i = F(i) from FUNCT_1:sch 3;
-  reconsider f as ManySortedSet of I() by B3,PARTFUN1:def 2,RELAT_1:def 18;
-  take f;
-  thus thesis by B6;
-end;
-
-
-scheme FuncRecursiveUniqu2
-  { X() -> non empty set, F(XFinSequence of X()) -> Element of X(),
-    F1,F2() -> sequence of  X()}:
-  F1() = F2()
-  provided
-A5: for n being Nat holds F1().n = F(F1()|n) and
-A2: for n being Nat holds F2().n = F(F2()|n)
+theorem Th1:
+  for T being Noetherian sup-Semilattice for I being Ideal of T
+  holds ex_sup_of I, T & sup I in I
 proof
-  deffunc FX(set) = F(IFXFinSequence($1,X()));
-  reconsider f1=F1() as Function;
-  reconsider f2=F2() as Function;
-A1: dom f1 = NAT & for n being Nat holds f1.n = FX(f1|n)
+  let T be Noetherian sup-Semilattice;
+  let I be Ideal of T;
+  consider a being Element of T such that
+A10: a in I and
+A20: for b being Element of T st b in I holds not a < b by Def2;
+A30: I is_<=_than a
   proof
-    thus dom f1 = NAT by FUNCT_2:def 1;
-    let n be Nat;
-    thus f1.n = F(F1()|n) by A5 .= FX(f1|n) by Def1;
+    let d be Element of T;
+    assume d in I;
+    then a"\/"d in I by A10,WAYBEL_0:40;
+    then
+A4: not a < a"\/"d by A20;
+    a <= a"\/"d by YELLOW_0:22;
+    then a = a"\/"d by A4,ORDERS_2:def 6;
+    hence thesis by YELLOW_0:22;
   end;
-A8: dom f2 = NAT & for n being Nat holds f2.n = FX(f2|n)
-  proof
-    thus dom f2 = NAT by FUNCT_2:def 1;
-    let n be Nat;
-    thus f2.n = F(F2()|n) by A2 .= FX(f2|n) by Def1;
-  end;
-  f1 = f2 from FuncRecursiveUniq(A1,A8);
-  hence thesis;
+  for c being Element of T st I is_<=_than c holds a <= c by A10;
+  hence thesis by A10,A30,YELLOW_0:30;
 end;

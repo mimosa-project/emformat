@@ -22,14 +22,17 @@ from py_miz_controller import (
 
 
 def main(argv):
+    os.environ["ENV"] = ""
     _, miz_path, vct_path, user_settings = argv
     user_settings = json.loads(user_settings)
     miz_controller = MizController()
     miz_controller.exec_file(miz_path, vct_path)
     token_table = miz_controller.token_table
+    ast_root = miz_controller.ast_root
 
     override_settings(user_settings)
     load_settings()
+    set_formatted_text(ast_root, token_table)
     formatted_lines = format(miz_controller, token_table)
     output(miz_path, formatted_lines)
 
@@ -198,7 +201,9 @@ def convert_token_lines_to_texts(miz_controller, token_lines: list[list[ASTToken
 def convert_tokens_to_text_array(tokens: list[ASTToken]) -> list[str]:
     if tokens == []:
         return []
-    return [token.text for token in tokens]
+    return [
+        token.text if (os.environ["ENV"] == "test") else token.formatted_text for token in tokens
+    ]
 
 
 def convert_token_lines_to_text_arrays(token_lines: list[list[ASTToken]]) -> list[list[str]]:
@@ -533,6 +538,8 @@ def count_comment_lines_before(token_lines: list[list[ASTToken]], target_line: i
 
 
 def remove_consecutive_value(array, value) -> list[Any]:
+    if len(array) == 0:
+        return []
     output = [array[0]]
     output.extend([j for i, j in zip(array, array[1:]) if j != value or i != j])
     return output
@@ -628,6 +635,21 @@ def generate_label_mapping(token_blocks) -> dict[int, str]:
                 label_var_counts[label_var] += 1
 
     return label_mapping
+
+
+def set_formatted_text(ast_root, token_table):
+    label_mapping = generate_label_mapping(generate_token_blocks(ast_root, token_table))
+    for i in range(token_table.token_num):
+        token = token_table.token(i)
+        token_id = token.ref_token.id if token.ref_token else token.id
+        if (
+            token.token_type == TokenType.IDENTIFIER
+            and token.identifier_type == IdentifierType.LABEL
+            and token_id in label_mapping.keys()
+        ):
+            token.set_formatted_text(label_mapping[token_id])
+        else:
+            token.set_formatted_text(token.text)
 
 
 if __name__ == "__main__":
