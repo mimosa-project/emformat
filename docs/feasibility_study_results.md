@@ -236,6 +236,43 @@ Summary:
 This theorem states that for any two natural numbers, m and n, the greatest common divisor (GCD) of m and n is equal to the GCD of m and the sum of m and n. In other words, GCD(m, n) = GCD(m, n + m). This result holds for all pairs of natural numbers.
 
 
+---
+
+Case 3. (EUCLID_3)
+
+```
+theorem
+  for p1,p2,p3 st p1<>p2 & p3<>p2 & (angle(p1,p2,p3)=PI/2 or angle(p1,p2
+  ,p3)=3/2*PI) holds |.p1-p2.|^2+|.p3-p2.|^2=|.p1-p3.|^2
+proof
+  let p1,p2,p3;
+  assume that
+A1: p1<>p2 & p3<>p2 and
+A2: angle(p1,p2,p3)=PI/2 or angle(p1,p2,p3)=3/2*PI;
+A3: euc2cpx(p1)-euc2cpx(p2)=euc2cpx(p1-p2) & euc2cpx(p3)-euc2cpx(p2)=euc2cpx
+  (p3- p2) by Th15;
+A4: euc2cpx(p1)-euc2cpx(p3)=euc2cpx(p1-p3) & |.euc2cpx(p1-p2).|=|.p1-p2.| by
+Th15,Th25;
+A5: |.euc2cpx(p3-p2).|=|.p3-p2.| & |.euc2cpx(p1-p3).|=|.p1-p3.| by Th25;
+  euc2cpx(p1)<> euc2cpx(p2) & euc2cpx(p3)<> euc2cpx(p2) by A1,Th4;
+  hence thesis by A2,A3,A4,A5,COMPLEX2:77;
+end;
+```
+
+Answer.
+
+Name:
+The Pythagorean Theorem in Euclidean Geometry
+
+Assumptions:
+- Three points p1, p2, and p3 in Euclidean space.
+- p1 is not equal to p2, and p3 is not equal to p2.
+- The angle formed by p1, p2, and p3 is either 90 degrees or 270 degrees.
+
+Summary:
+The theorem states that if we have three points p1, p2, and p3 in Euclidean space, where p1 is not equal to p2 and p3 is not equal to p2, and the angle formed by p1, p2, and p3 is either 90 degrees or 270 degrees, then the sum of the squares of the distances from p1 to p2 and from p3 to p2 is equal to the square of the distance from p1 to p3.
+
+
 ## Proof Completion
 ### Prompt
 The following is a theorem described in Mizar. 
