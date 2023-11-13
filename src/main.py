@@ -34,10 +34,10 @@ def main(argv):
     set_formatted_text(ast_root, token_table)
 
     match mode:
-      case "-f" | "-format":
+      case "-f" | "--format":
         formatted_lines = format(miz_controller, token_table)
         output(miz_path, formatted_lines)
-      case "-l" | "-lint":
+      case "-l" | "--lint":
         lint()
       case _:
         pass
