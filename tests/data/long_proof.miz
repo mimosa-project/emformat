@@ -1,0 +1,35 @@
+theorem Th1:
+  for f,g,h being Function st dom f /\ dom g c= dom h holds f+*g+*h = g+*f+*h
+proof
+  let f,g,h be Function;
+A1: dom (g+*f+*h) = dom (g+*f) \/ dom h by FUNCT_4:def 1;
+A2: dom (f+*g) = dom f \/ dom g by FUNCT_4:def 1;
+  assume
+A3: dom f /\ dom g c= dom h;
+A4: now
+    let x be object;
+    assume
+A5: x in dom f \/ dom g \/ dom h;
+    per cases;
+    suppose
+A6:   x in dom h;
+      then (f+*g+*h).x = h.x by FUNCT_4:13;
+      hence (f+*g+*h).x = (g+*f+*h).x by A6,FUNCT_4:13;
+    end;
+    suppose
+A7:   not x in dom h;
+      then not x in dom f /\ dom g by A3;
+      then
+A8:   not x in dom f or not x in dom g by XBOOLE_0:def 4;
+A9:   (f+*g+*h).x = (f+*g).x by A7,FUNCT_4:11;
+      x in dom g \/ dom f by A5,A7,XBOOLE_0:def 3;
+      then x in dom f or x in dom g by XBOOLE_0:def 3;
+      then (f+*g).x = f.x & (g+*f).x = f.x or (f+*g).x = g.x & (g+*f).x = g.x
+      by A8,FUNCT_4:11,13;
+      hence (f+*g+*h).x = (g+*f+*h).x by A7,A9,FUNCT_4:11;
+    end;
+  end;
+A10: dom (g+*f) = dom g \/ dom f by FUNCT_4:def 1;
+  dom (f+*g+*h) = dom (f+*g) \/ dom h by FUNCT_4:def 1;
+  hence thesis by A1,A2,A10,A4;
+end;

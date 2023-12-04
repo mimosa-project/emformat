@@ -38,7 +38,7 @@ def main(argv):
         formatted_lines = format(miz_controller, token_table)
         output(miz_path, formatted_lines)
       case "-l" | "--lint":
-        lint()
+        lint(miz_controller)
       case _:
         pass
 
