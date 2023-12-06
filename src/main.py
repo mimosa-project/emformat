@@ -58,6 +58,7 @@ def override_settings(user_settings: dict):
             "STANDARD_INDENTATION_WIDTH",
             "ENVIRON_DIRECTIVE_INDENTATION_WIDTH",
             "ENVIRON_LINE_INDENTATION_WIDTH",
+            "MAX_PROOF_LINE_NUMBER",
         ]:
             if re.fullmatch(r"\d+", setting_value):
                 setting_value = int(setting_value)
