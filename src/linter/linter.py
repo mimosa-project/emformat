@@ -1,6 +1,5 @@
 import logging
 import utils.option as option
-from collections import deque
 from py_miz_controller import (
     BlockType,
     ElementType,
