@@ -81,25 +81,28 @@ def check_redundant_statement_label(ast_block, token_lines):
     for statement, next_statement in zip(
         ast_statements[: len(ast_statements) - 1], ast_statements[1:]
     ):
-        # 式にラベルが1つだけ振られていることをチェック
+        # 式にラベルが振られていることをチェック
         statement_tokens = extract_statement_tokens(
             token_lines,
             statement.range_first_token.line_number,
             statement.range_last_token.line_number,
         )
-        referenced_labels = []
+        referenced_label = None
         for token in statement_tokens:
+            # `that`は2つ以上文を取れるため直後で`then`は使えない
+            if token.text == "that":
+                break
+
             if (
                 token.token_type == TokenType.IDENTIFIER
                 and token.identifier_type == IdentifierType.LABEL
                 and not token.ref_token
             ):
-                referenced_labels.append(token)
+                referenced_label = token
+                break
 
-        if len(referenced_labels) != 1:
+        if not referenced_label:
             continue
-
-        referenced_label = referenced_labels[0]
 
         # 直後の式がラベルを引用しているかどうかチェック
         next_statement_tokens = extract_statement_tokens(
