@@ -20,6 +20,7 @@ from py_miz_controller import (
     BlockType,
 )
 
+
 def main(argv):
     os.environ["ENV"] = ""
     _, mode, miz_path, vct_path, user_settings = argv
@@ -34,13 +35,13 @@ def main(argv):
     set_formatted_text(ast_root, token_table)
 
     match mode:
-      case "-f" | "--format":
-        formatted_lines = format(miz_controller, token_table)
-        output(miz_path, formatted_lines)
-      case "-l" | "--lint":
-        lint(miz_controller)
-      case _:
-        pass
+        case "-f" | "--format":
+            formatted_lines = format(miz_controller, token_table)
+            output(miz_path, formatted_lines)
+        case "-l" | "--lint":
+            lint(miz_controller)
+        case _:
+            pass
 
 
 # ユーザーが指定した項目値を設定
@@ -59,6 +60,7 @@ def override_settings(user_settings: dict):
             "ENVIRON_DIRECTIVE_INDENTATION_WIDTH",
             "ENVIRON_LINE_INDENTATION_WIDTH",
             "MAX_PROOF_LINE_NUMBER",
+            "MAX_NESTING_DEPTH",
         ]:
             if re.fullmatch(r"\d+", setting_value):
                 setting_value = int(setting_value)
@@ -122,6 +124,7 @@ def cut_center_space_format_is_valid(cut_center_space_value: Any) -> bool:
             return False
 
     return True
+
 
 # チェック対象のラベルに対して、{トークンID: ラベル名} のリストを返す
 def generate_label_mapping(token_blocks) -> dict[int, str]:
@@ -194,13 +197,16 @@ def generate_block_ranges(ast_root) -> list[list[int]]:
                 i != 0
                 and type(ast_root.child_component(i).block_type == BlockType.PROOF)
                 and type(ast_root.child_component(i - 1)) == ASTStatement
-                and ast_root.child_component(i - 1).statement_type == StatementType.SCHEME
+                and ast_root.child_component(i - 1).statement_type
+                == StatementType.SCHEME
             ):
                 # Schemeブロック内でproofブロックが出現する場合、
                 # Schemeブロック先頭からproofブロック末尾までをまとめて一つのブロックとみなす
                 block_ranges[-1][1] = ast_component.last_token.id
             else:
-                block_ranges.append([ast_component.first_token.id, ast_component.last_token.id])
+                block_ranges.append(
+                    [ast_component.first_token.id, ast_component.last_token.id]
+                )
         elif ast_component.statement_type == StatementType.SCHEME:
             block_ranges.append(
                 [ast_component.range_first_token.id, ast_component.range_last_token.id]
