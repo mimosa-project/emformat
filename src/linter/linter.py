@@ -51,26 +51,22 @@ def check_long_proof(ast_root):
 def check_too_many_nested_blocks(ast_root):
     for i in range(ast_root.child_component_num):
         ast_component = ast_root.child_component(i)
-        if ast_component.element_type != ElementType.BLOCK:
-            continue
-
-        initial_nesting_number = 1
-        nesting_levels = count_nesting_levels(ast_component, [initial_nesting_number])
-
-        if (max(nesting_levels)) > option.MAX_NESTING_DEPTH:
-            logging.error(
-                f"Too many nested blocks [Ln {ast_component.range_first_token.line_number}, Col {ast_component.range_first_token.column_number}]"
-            )
+        initial_nesting_level = 0
+        count_nesting_level(ast_component, initial_nesting_level)
 
 
-def count_nesting_levels(ast_component, nesting_levels):
+def count_nesting_level(ast_component, current_nesting_level):
+    if ast_component.element_type != ElementType.BLOCK:
+        return
+
+    current_nesting_level += 1
+    if current_nesting_level > option.MAX_NESTING_DEPTH:
+        logging.error(
+            f"Too many nested blocks [Ln {ast_component.range_first_token.line_number}, Col {ast_component.range_first_token.column_number}]"
+        )
+
     for i in range(ast_component.child_component_num):
-        if ast_component.child_component(i).element_type == ElementType.BLOCK:
-            nesting_levels[-1] += 1
-            count_nesting_levels(ast_component.child_component(i), nesting_levels)
-            nesting_levels.append(nesting_levels[-1] - 1)
-
-    return nesting_levels
+        count_nesting_level(ast_component.child_component(i), current_nesting_level)
 
 
 def generate_token_lines(token_table) -> list[list[ASTToken]]:
