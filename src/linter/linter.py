@@ -71,6 +71,8 @@ def count_nesting_levels(ast_component, nesting_levels):
             nesting_levels.append(nesting_levels[-1] - 1)
 
     return nesting_levels
+
+
 def generate_token_lines(token_table) -> list[list[ASTToken]]:
     token_lines: list[list] = [[] for _ in range(token_table.last_token.line_number)]
 
