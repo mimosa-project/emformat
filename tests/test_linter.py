@@ -54,3 +54,17 @@ def test_check_too_many_nested_blocks2(caplog):
     setattr(option, "MAX_NESTING_DEPTH", 5)
     check_too_many_nested_blocks(tmdg_ast_root)
     assert not "Too many nested blocks" in caplog.text
+
+
+rl_miz_controller = MizController()
+rl_miz_controller.exec_file(
+    f"{TEST_DIR}/data/redundant_label.miz", f"{TEST_DIR}/data/mml.vct"
+)
+rl_ast_root = rl_miz_controller.ast_root
+rl_token_table = rl_miz_controller.token_table
+
+
+def test_check_redundant_statement_label(caplog):
+    token_lines = generate_token_lines(rl_token_table)
+    check_redundant_statement_label(rl_ast_root, token_lines)
+    assert caplog.text.count("is redundant citation label") == 3
