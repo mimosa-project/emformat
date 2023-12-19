@@ -13,7 +13,6 @@ from py_miz_controller import (
 
 def lint(miz_controller):
     ast_root = miz_controller.ast_root
-
     token_table = miz_controller.token_table
     token_lines = generate_token_lines(token_table)
 
