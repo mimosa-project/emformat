@@ -14,12 +14,11 @@ from py_miz_controller import (
 def lint(miz_controller):
     ast_root = miz_controller.ast_root
 
-    check_long_proof(ast_root)
-    check_too_many_nested_blocks(ast_root)
     token_table = miz_controller.token_table
     token_lines = generate_token_lines(token_table)
 
     check_long_proof(ast_root)
+    check_too_many_nested_blocks(ast_root)
     check_redundant_statement_label(ast_root, token_lines)
 
 
