@@ -64,7 +64,7 @@ def extract_ast_statements(ast_block) -> list[ASTStatement]:
     return ast_statements
 
 
-def extract_statement_tokens(
+def extract_ast_statement_tokens(
     token_lines, start_line_number, end_line_number
 ) -> list[ASTToken]:
     return list(
@@ -82,7 +82,7 @@ def check_redundant_statement_label(ast_block, token_lines):
         ast_statements[: len(ast_statements) - 1], ast_statements[1:]
     ):
         # 式にラベルが振られていることをチェック
-        statement_tokens = extract_statement_tokens(
+        statement_tokens = extract_ast_statement_tokens(
             token_lines,
             statement.range_first_token.line_number,
             statement.range_last_token.line_number,
@@ -105,7 +105,7 @@ def check_redundant_statement_label(ast_block, token_lines):
             continue
 
         # 直後の式がラベルを引用しているかどうかチェック
-        next_statement_tokens = extract_statement_tokens(
+        next_statement_tokens = extract_ast_statement_tokens(
             token_lines,
             next_statement.range_first_token.line_number,
             next_statement.range_last_token.line_number,
