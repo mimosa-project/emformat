@@ -67,5 +67,6 @@
     "[",
     "{"
   ],
-  "MAX_PROOF_LINE_NUMBER": 1000
+  "MAX_PROOF_LINE_NUMBER": 1000,
+  "MAX_NESTING_DEPTH": 10
 }

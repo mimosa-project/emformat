@@ -36,6 +36,26 @@ def test_check_long_proof2(caplog):
     assert not "Proof too long" in caplog.text
 
 
+tmng_miz_controller = MizController()
+tmng_miz_controller.exec_file(
+    f"{TEST_DIR}/data/too_many_nested_blocks.miz", f"{TEST_DIR}/data/mml.vct"
+)
+tmdg_ast_root = tmng_miz_controller.ast_root
+
+
+def test_check_too_many_nested_blocks1(caplog):
+    setattr(option, "MAX_NESTING_DEPTH", 4)
+    check_too_many_nested_blocks(tmdg_ast_root)
+    assert caplog.text.count("Too many nested blocks") == 5
+    assert "Too many nested blocks" in caplog.text
+
+
+def test_check_too_many_nested_blocks2(caplog):
+    setattr(option, "MAX_NESTING_DEPTH", 5)
+    check_too_many_nested_blocks(tmdg_ast_root)
+    assert not "Too many nested blocks" in caplog.text
+
+
 rl_miz_controller = MizController()
 rl_miz_controller.exec_file(
     f"{TEST_DIR}/data/redundant_label.miz", f"{TEST_DIR}/data/mml.vct"

@@ -1,0 +1,329 @@
+environ
+
+ vocabularies NUMBERS, ZFMISC_1, RELAT_2, REWRITE1, XBOOLE_0, ORDERS_2,
+      PRELAMB, SUBSET_1, IDEAL_1, TARSKI, RELAT_1, STRUCT_0, ARYTM_3, XXREAL_0,
+      WAYBEL_0, LATTICE3, LATTICES, EQREL_1, CARD_FIL, YELLOW_0, ORDINAL2,
+      BINOP_1, FUNCT_1, OPOSET_1, CARD_1, FUNCOP_1, FINSUB_1, YELLOW_1,
+      ARYTM_0, WELLORD2, FINSEQ_1, FUNCT_7, NAT_1, ORDINAL4, FINSET_1,
+      FINSEQ_5, ARYTM_1, ABCMIZ_0, ABIAN, XCMPLX_0;
+ notations TARSKI, XBOOLE_0, ZFMISC_1, RELAT_1, RELAT_2, SUBSET_1, ORDINAL1,
+      FINSUB_1, CARD_1, FUNCT_1, RELSET_1, PARTFUN1, FUNCT_2, BINOP_1,
+      ORDERS_1, FUNCOP_1, FINSET_1, FINSEQ_1, FUNCT_4, ALG_1, FINSEQ_5,
+      NUMBERS, XCMPLX_0, NAT_1, DOMAIN_1, STRUCT_0, ORDERS_2, LATTICE3,
+      REWRITE1, YELLOW_0, WAYBEL_0, YELLOW_1, YELLOW_7, XXREAL_0;
+ constructors FINSUB_1, NAT_1, FINSEQ_5, REWRITE1, BORSUK_1, LATTICE3,
+      WAYBEL_0, YELLOW_1, FUNCOP_1, XREAL_0, NUMBERS;
+ registrations XBOOLE_0, SUBSET_1, RELAT_1, FUNCT_2, FINSET_1, FINSUB_1,
+      XXREAL_0, XREAL_0, NAT_1, FINSEQ_1, REWRITE1, STRUCT_0, LATTICE3,
+      YELLOW_0, WAYBEL_0, YELLOW_1, YELLOW_7, YELLOW_9, ORDINAL1, CARD_1,
+      RELSET_1;
+ requirements BOOLE, SUBSET, NUMERALS, REAL, ARITHM;
+ definitions TARSKI, XBOOLE_0, RELAT_2, FUNCT_1, FINSEQ_1, LATTICE3, REWRITE1,
+      YELLOW_0, WAYBEL_0, RELSET_1;
+ equalities FINSEQ_1, LATTICE3, ORDINAL1;
+ expansions TARSKI, XBOOLE_0, FUNCT_1, FINSEQ_1, LATTICE3, REWRITE1, WAYBEL_0;
+ theorems TARSKI, XBOOLE_0, XBOOLE_1, SUBSET_1, FINSUB_1, NAT_1, FINSEQ_1,
+      CARD_1, TREES_1, FINSEQ_5, RELAT_1, RELSET_1, FUNCT_1, FUNCT_2, FUNCT_4,
+      FUNCOP_1, STRUCT_0, ORDERS_2, YELLOW_0, WAYBEL_0, YELLOW_1, YELLOW_4,
+      YELLOW_7, WAYBEL_6, WAYBEL_8, ZFMISC_1, FINSEQ_2, FINSEQ_3, HILBERT2,
+      REWRITE1, ORDINAL1, XREAL_1, XXREAL_0, CARD_2;
+ schemes XBOOLE_0, NAT_1, FUNCT_1, FUNCT_2, RECDEF_1, RELSET_1, ORDERS_1,
+      XFAMILY;
+
+begin :: Semilattice of type widening
+
+definition
+  let T be non empty non void reflexive transitive TA-structure;
+  let t be type of T;
+  let p be FinSequence of the adjectives of T;
+  func apply(p,t) -> FinSequence of the carrier of T means
+  :Def19:
+  len it =
+  len p+1 & it.1 = t & for i being Element of NAT, a being adjective of T, t
+  being type of T st i in dom p & a = p.i & t = it.i holds it.(i+1) = a ast t;
+  existence
+  proof
+    defpred P[set,set,set] means ex a being adjective of T st a = p.$1 & ($2
+is not type of T & $3 = 0 or ex t being type of T st t = $2 & $3 = a ast t);
+A1: for i being Nat st 1 <= i & i < len p+1 for x being set ex
+    y being set st P[i,x,y]
+    proof
+      let i be Nat;
+      assume
+A2:   1 <= i;
+      assume i < len p+1;
+      then i <= len p by NAT_1:13;
+      then i in dom p by A2,FINSEQ_3:25;
+      then p.i in rng p by FUNCT_1:3;
+      then reconsider a = p.i as adjective of T;
+      let x be set;
+      per cases;
+      suppose
+A3:     x is not type of T;
+        take 0, a;
+        thus thesis by A3;
+      end;
+      suppose
+        x is type of T;
+        then reconsider t = x as type of T;
+        take a ast t, a;
+        thus a = p.i;
+        thus thesis;
+      end;
+    end;
+    consider q being FinSequence such that
+A4: len q = len p+1 and
+A5: q.1 = t or len p+1 = 0 and
+A6: for i being Nat st 1 <= i & i < len p+1 holds P[i,q.i,
+    q.(i+1)] from RECDEF_1:sch 3(A1);
+    defpred P[Nat] means $1 in dom q implies q.$1 is type of T;
+A7: now
+      let k be Nat such that
+A8:   P[k];
+      now
+        assume k+1 in dom q;
+        then k+1 <= len q by FINSEQ_3:25;
+        then
+A9:     k < len q by NAT_1:13;
+A10:    k <> 0 implies k >= 0+1 by NAT_1:13;
+        then
+        k <> 0 implies ex a being adjective of T st a = p.k & (q.k is not
+type of T & q.(k+1) = 0 or ex t being type of T st t = q.k & q.(k+1) = a ast t)
+        by A4,A6,A9;
+        hence q.(k+1) is type of T by A5,A8,A10,A9,FINSEQ_3:25;
+      end;
+      hence P[k+1];
+    end;
+A11: P[0] by FINSEQ_3:24;
+A12: for k being Nat holds P[k] from NAT_1:sch 2(A11,A7);
+    rng q c= the carrier of T
+    proof
+      let a be object;
+      assume a in rng q;
+      then ex x being object st x in dom q & a = q.x by FUNCT_1:def 3;
+      then a is type of T by A12;
+      hence thesis;
+    end;
+    then reconsider q as FinSequence of the carrier of T by FINSEQ_1:def 4;
+    take q;
+    thus len q = len p+1 & q.1 = t by A4,A5;
+    let i be Element of NAT, a be adjective of T, t being type of T;
+    assume that
+A13: i in dom p and
+A14: a = p.i and
+A15: t = q.i;
+    i <= len p by A13,FINSEQ_3:25;
+    then
+A16: i < len p+1 by NAT_1:13;
+    i >= 1 by A13,FINSEQ_3:25;
+    then
+    ex a being adjective of T st a = p.i & (q.i is not type of T & q.(i+1
+    )=0 or ex t being type of T st t = q.i & q.(i+1) = a ast t) by A6,A16;
+    hence thesis by A14,A15;
+  end;
+  correctness
+  proof
+    let q1, q2 be FinSequence of the carrier of T such that
+A17: len q1 = len p+1 and
+A18: q1.1 = t and
+A19: for i being Element of NAT, a being adjective of T, t being type
+    of T st i in dom p & a = p.i & t = q1.i holds q1.(i+1) = a ast t and
+A20: len q2 = len p+1 and
+A21: q2.1 = t and
+A22: for i being Element of NAT, a being adjective of T, t being type
+    of T st i in dom p & a = p.i & t = q2.i holds q2.(i+1) = a ast t;
+    defpred P[Nat] means $1 in dom q1 implies q1.$1 = q2.$1;
+A23: now
+      let i be Nat such that
+A24:  P[i];
+      now
+        assume i+1 in dom q1;
+        then
+A25:    i+1 <= len q1 by FINSEQ_3:25;
+        then
+A26:    i <= len q1 by NAT_1:13;
+A27:    i <= len p by A17,A25,XREAL_1:6;
+        per cases;
+        suppose
+          i = 0;
+          hence q1.(i+1) = q2.(i+1) by A18,A21;
+        end;
+        suppose
+          i > 0;
+          then
+A28:      i >= 0+1 by NAT_1:13;
+          then
+A29:      i in dom p by A27,FINSEQ_3:25;
+          then reconsider a = p.i as adjective of T by FINSEQ_2:11;
+          i in dom q1 by A26,A28,FINSEQ_3:25;
+          then reconsider t = q1.i as type of T by FINSEQ_2:11;
+          thus q1.(i+1) = a ast t by A19,A29
+            .= q2.(i+1) by A22,A24,A26,A28,A29,FINSEQ_3:25;
+        end;
+      end;
+      hence P[i+1];
+    end;
+A30: P[0] by FINSEQ_3:25;
+A31: for i being Nat holds P[i] from NAT_1:sch 2(A30,A23);
+    dom q1 = dom q2 by A17,A20,FINSEQ_3:29;
+    hence thesis by A31;
+  end;
+end;
+
+registration
+  let T be non empty non void reflexive transitive TA-structure;
+  let t be type of T;
+  let p be FinSequence of the adjectives of T;
+  cluster apply(p,t) -> non empty;
+  coherence
+  proof
+    len apply(p,t) = len p+1 by Def19;
+    hence thesis;
+  end;
+end;
+
+scheme
+  MinimalFiniteSet{P[set]}: ex A being finite set st P[A] & for B being set st
+  B c= A & P[B] holds B = A
+provided
+A1: ex A being finite set st P[A]
+proof
+  consider A being finite set such that
+A2: P[A] by A1;
+  defpred R[set,set] means $1 c= $2;
+  consider Y being set such that
+A3: for x being set holds x in Y iff x in bool A & P[x] from XFAMILY:
+  sch 1;
+  A c= A;
+  then reconsider Y as non empty set by A2,A3;
+  Y c= bool A
+  by A3;
+  then reconsider Y as finite non empty set;
+A4: for x,y being Element of Y st R[x,y] & R[y,x] holds x = y;
+A5: for x,y,z being Element of Y st R[x,y] & R[y,z] holds R[x,z] by XBOOLE_1:1;
+A6: for X being set st X c= Y & (for x,y being Element of Y st x in X & y in
+X holds R[x,y] or R[y,x]) holds ex y being Element of Y st for x being Element
+  of Y st x in X holds R[y,x]
+  proof
+    let X be set such that
+A7: X c= Y and
+A8: for x,y being Element of Y st x in X & y in X holds R[x,y] or R[y ,x];
+    per cases;
+    suppose
+A9:   X = {};
+      set y = the Element of Y;
+      take y;
+      thus thesis by A9;
+    end;
+    suppose
+A10:  X <> {};
+      set x0 = the Element of X;
+      x0 in X by A10;
+      then reconsider x0 as Element of Y by A7;
+      deffunc F(set) = card {y where y is Element of Y: y in X & y c< $1};
+      consider f being Function such that
+A11:  dom f = X & for x being set st x in X holds f.x = F(x) from
+      FUNCT_1:sch 5;
+      defpred P[Nat] means ex x being Element of Y st x in X & $1 = f.x;
+A12:  for k being Nat st k<>0 & P[k] ex n being Nat st n<k & P[n]
+      proof
+        let k be Nat such that
+A13:    k <> 0;
+        given x being Element of Y such that
+A14:    x in X and
+A15:    k = f.x;
+        set fx = {a where a is Element of Y: a in X & a c< x};
+        fx c= Y
+        proof
+          let a be object;
+          assume a in fx;
+          then ex z being Element of Y st a = z & z in X & z c< x;
+          hence thesis;
+        end;
+        then reconsider fx as finite set;
+A16:    k = card fx by A11,A14,A15;
+        set A = {z where z is Element of Y: z in X & z c< x};
+        reconsider A as non empty set by A11,A13,A14,A15,CARD_1:27;
+        set z = the Element of A;
+        z in A;
+        then consider y being Element of Y such that
+A17:    z = y and
+A18:    y in X and
+A19:    y c< x;
+        set fx0 = {a where a is Element of Y: a in X & a c< y};
+        fx0 c= Y
+        proof
+          let a be object;
+          assume a in fx0;
+          then ex z being Element of Y st a = z & z in X & z c< y;
+          hence thesis;
+        end;
+        then reconsider fx0 as finite set;
+        reconsider n = card fx0 as Element of NAT;
+        take n;
+        not ex a being Element of Y st y = a & a in X & a c< y;
+        then
+A20:    not y in fx0;
+A21:    y in fx by A17;
+A22:    fx0 c= fx
+        proof
+          let a be object;
+          assume a in fx0;
+          then consider b being Element of Y such that
+A23:      a = b and
+A24:      b in X and
+A25:      b c< y;
+          b c< x by A19,A25,XBOOLE_1:56;
+          hence thesis by A23,A24;
+        end;
+        then Segm card fx0 c= Segm card fx by CARD_1:11;
+        then n <= k by A16,NAT_1:39;
+        hence n < k by A16,A22,A21,A20,CARD_2:102,XXREAL_0:1;
+        take y;
+        thus thesis by A11,A18;
+      end;
+      set fx0 = {y where y is Element of Y: y in X & y c< x0};
+      fx0 c= Y
+      proof
+        let a be object;
+        assume a in fx0;
+        then ex y being Element of Y st a = y & y in X & y c< x0;
+        hence thesis;
+      end;
+      then reconsider fx0 as finite set;
+      f.x0 = card fx0 by A10,A11;
+      then
+A26:  ex n being Nat st P[n] by A10;
+      P[0] from NAT_1:sch 7(A26,A12);
+      then consider y being Element of Y such that
+A27:  y in X and
+A28:  0 = f.y;
+      take y;
+      let x be Element of Y;
+      assume
+A29:  x in X;
+      then x c= y or y c= x by A8,A27;
+      then x c< y or y c= x;
+      then
+A30:  x in {z where z is Element of Y: z in X & z c< y} or y c= x by A29;
+      f.y = card {z where z is Element of Y: z in X & z c< y} by A11,A27;
+      hence thesis by A28,A30;
+    end;
+  end;
+A31: for x being Element of Y holds R[x,x];
+  consider x being Element of Y such that
+A32: for y being Element of Y st x <> y holds not R[y,x] from ORDERS_1:
+  sch 2(A31,A4,A5,A6);
+  x in bool A by A3;
+  then reconsider x as finite set;
+  take x;
+  thus P[x] by A3;
+  let B be set;
+  assume that
+A33: B c= x and
+A34: P[B];
+  x in bool A by A3;
+  then B c= A by A33,XBOOLE_1:1;
+  then B in Y by A3,A34;
+  hence thesis by A32,A33;
+end;

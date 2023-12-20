@@ -17,6 +17,7 @@ def lint(miz_controller):
     token_lines = generate_token_lines(token_table)
 
     check_long_proof(ast_root)
+    check_too_many_nested_blocks(ast_root)
     check_redundant_statement_label(ast_root, token_lines)
 
 
@@ -43,6 +44,27 @@ def check_long_proof(ast_root):
             )
         else:
             check_long_proof(ast_component)
+
+
+def check_too_many_nested_blocks(ast_root):
+    for i in range(ast_root.child_component_num):
+        ast_component = ast_root.child_component(i)
+        initial_nesting_level = 0
+        count_nesting_level(ast_component, initial_nesting_level)
+
+
+def count_nesting_level(ast_component, current_nesting_level):
+    if ast_component.element_type != ElementType.BLOCK:
+        return
+
+    current_nesting_level += 1
+    if current_nesting_level > option.MAX_NESTING_DEPTH:
+        logging.error(
+            f"Too many nested blocks [Ln {ast_component.range_first_token.line_number}, Col {ast_component.range_first_token.column_number}]"
+        )
+
+    for i in range(ast_component.child_component_num):
+        count_nesting_level(ast_component.child_component(i), current_nesting_level)
 
 
 def generate_token_lines(token_table) -> list[list[ASTToken]]:
